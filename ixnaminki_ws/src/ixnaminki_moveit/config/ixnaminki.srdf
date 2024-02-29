@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<robot name = "ixnaminki_olinki">
+    <!--group name="arm1">
+
+    </group-->
+    <group name="arm">
+        <!--joint name="virtual_joint"/>
+        <joint name="joint_15"/>
+        <joint name="joint_16"/>
+        <joint name="joint_17"/>
+        <joint name="joint_18"/>
+        <joint name="joint_19"/>
+        <joint name="joint_20"/>
+        <joint name="joint_21"/>
+        <joint name="joint_22"/>
+        <joint name="joint_23"/>
+        <joint name="joint_24"/>
+        
+        <joint name="joint_25"/>
+        <joint name="joint_26"/>
+        <joint name="joint_27"/>
+        <joint name="joint_28"/>
+
+        <joint name="joint_29"/-->
+
+        <!--joint name="joint_21"/>
+        <joint name="joint_20"/>
+        <joint name="joint_23"/>
+        
+        <link name = "base_link"/>
+        <link name = "base_link_arm"/>
+        <link name = "rotation_base"/>
+
+        <link name="eje_brazo"/>
+        
+        <link name="placa_baja_brazo_izquierdo"/>
+        <link name="placa_baja_brazo_derecho"/-->
+
+
+        <!--link name="01_oreja"/>
+        <link name="02_oreja"/>
+        <link name="carcasa"/>
+        <link name="placa_alta_brazo_izquierdo"/>
+        <link name="placa_alta_brazo_derecho"/>
+        <link name="01_espaciador"/>
+        <link name="02_espaciador"/>
+        <link name="03_espaciador"/>
+        <link name="04_espaciador"/>
+        <link name="fin"/-->
+
+        <chain base_link="base_link" tip_link="carcasa"/>
+        <!--chain base_link="base_link" tip_link="fin"/-->
+
+    </group>
+    <group name="flipper01">
+        <joint name="virtual_joint"/>
+        <joint name="joint_2"/>
+        <joint name="joint_3"/>
+        <joint name="joint_4"/>
+        <joint name="joint_7"/>
+        <joint name="joint_8"/>
+        <!--chain base_link="base_link" tip_link="01_Placa"/-->
+    </group>
+    <group name="flipper02">
+        <joint name="joint_9"/>
+        <joint name="joint_10"/>
+    </group>
+    <group_state name="home" group="flipper01">
+        <joint name="joint_7" value="0"/>
+    </group_state>
+    <group_state name="home" group="flipper02">
+        <joint name="joint_9" value="0"/>
+    </group_state>
+    <group_state name="home" group="arm">
+        <joint name="joint_16" value="0"/>
+        <joint name="joint_20" value="0"/>
+        <joint name="joint_23" value="0"/>
+    </group_state>
+    
+    <disable_collisions link1="base_link" link2="02_EjePrincipal" reason="Adjacent"/>
+    <disable_collisions link1="base_link" link2="02_EjePrincipal2" reason="Adjacent"/>
+    <!--disable_collisions link1="base_link" link2="01_PlateSprocket" reason="Never"/>
+    <disable_collisions link1="base_link" link2="02_PlateSprocket" reason="Never"/>
+    <disable_collisions link1="base_link" link2="03_PlateSprocket" reason="Never"/>
+    <disable_collisions link1="base_link" link2="04_PlateSprocket" reason="Never"/>
+    <disable_collisions link1="base_link" link2="01_Placa" reason="Never"/>
+    <disable_collisions link1="base_link" link2="02_Placa" reason="Never"/>
+    <disable_collisions link1="base_link" link2="03_Placa" reason="Never"/>
+    <disable_collisions link1="base_link" link2="04_Placa" reason="Never"/>
+    <disable_collisions link1="base_link" link2="01_FlatSprocket" reason="Never"/>
+    <disable_collisions link1="base_link" link2="02_FlatSprocket" reason="Never"/>
+    <disable_collisions link1="base_link" link2="03_FlatSprocket" reason="Never"/>
+    <disable_collisions link1="base_link" link2="04_FlatSprocket" reason="Never"/-->
+
+    <disable_collisions link1="02_EjePrincipal" link2="03_PlateSprocket" reason="Adjacent"/>
+    <disable_collisions link1="02_EjePrincipal" link2="04_PlateSprocket" reason="Adjacent"/>
+    <disable_collisions link1="02_EjePrincipal" link2="03_Placa" reason="Adjacent"/>
+    <disable_collisions link1="02_EjePrincipal" link2="04_Placa" reason="Adjacent"/>
+    <!--disable_collisions link1="02_EjePrincipal" link2="02_EjePrincipal2" reason="Adjacent"/>
+    <disable_collisions link1="02_EjePrincipal" link2="01_PlateSprocket" reason="Never"/>
+    <disable_collisions link1="02_EjePrincipal" link2="02_PlateSprocket" reason="Never"/>
+    <disable_collisions link1="02_EjePrincipal" link2="01_Placa" reason="Never"/>
+    <disable_collisions link1="02_EjePrincipal" link2="02_Placa" reason="Never"/>
+    <disable_collisions link1="02_EjePrincipal" link2="01_FlatSprocket" reason="Never"/>
+    <disable_collisions link1="02_EjePrincipal" link2="02_FlatSprocket" reason="Never"/>
+    <disable_collisions link1="02_EjePrincipal" link2="03_FlatSprocket" reason="Never"/-->
+
+    <disable_collisions link1="02_EjePrincipal2" link2="01_PlateSprocket" reason="Adjacent"/>
+    <disable_collisions link1="02_EjePrincipal2" link2="02_PlateSprocket" reason="Adjacent"/>
+    <disable_collisions link1="02_EjePrincipal2" link2="01_Placa" reason="Adjacent"/>
+    <disable_collisions link1="02_EjePrincipal2" link2="02_Placa" reason="Adjacent"/>
+    <!--disable_collisions link1="02_EjePrincipal2" link2="02_EjePrincipal" reason="Adjacent"/>
+    <disable_collisions link1="02_EjePrincipal2" link2="03_PlateSprocket" reason="Never"/>
+    <disable_collisions link1="02_EjePrincipal2" link2="04_PlateSprocket" reason="Never"/>
+    <disable_collisions link1="02_EjePrincipal2" link2="03_Placa" reason="Never"/>
+    <disable_collisions link1="02_EjePrincipal2" link2="04_Placa" reason="Never"/>
+    <disable_collisions link1="02_EjePrincipal2" link2="01_FlatSprocket" reason="Never"/>
+    <disable_collisions link1="02_EjePrincipal2" link2="02_FlatSprocket" reason="Never"/>
+    <disable_collisions link1="02_EjePrincipal2" link2="03_FlatSprocket" reason="Never"/-->
+
+
+    <disable_collisions link1="01_Placa" link2="01_FlatSprocket" reason="Adjacent"/>
+    <disable_collisions link1="02_Placa" link2="02_FlatSprocket" reason="Adjacent"/>
+    <disable_collisions link1="03_Placa" link2="03_FlatSprocket" reason="Adjacent"/>
+    <disable_collisions link1="04_Placa" link2="04_FlatSprocket" reason="Adjacent"/>
+
+    <disable_collisions link1="base_link" link2="base_link_arm" reason="Never"/>
+    <disable_collisions link1="base_link_arm" link2="rotation_base" reason="Never"/>
+
+    <disable_collisions link1="rotation_base" link2="01_oreja" reason="Adjacent"/>
+    <disable_collisions link1="rotation_base" link2="02_oreja" reason="Adjacent"/>
+    <disable_collisions link1="rotation_base" link2="eje_brazo" reason="Never"/>
+
+    <disable_collisions link1="eje_brazo" link2="placa_baja_brazo_izquierdo" reason="Adjacent"/>
+    <disable_collisions link1="eje_brazo" link2="placa_baja_brazo_derecho" reason="Adjacent"/>
+
+    <disable_collisions link1="placa_baja_brazo_izquierdo" link2="carcasa" reason="Adjacent"/>
+    <disable_collisions link1="placa_baja_brazo_derecho" link2="placa_alta_brazo_izquierdo" reason="Adjacent"/>
+    <disable_collisions link1="placa_baja_brazo_derecho" link2="placa_alta_brazo_derecho" reason="Never"/>
+    <disable_collisions link1="placa_alta_brazo_derecho" link2="01_espaciador" reason="Adjacent"/>
+    <disable_collisions link1="placa_alta_brazo_derecho" link2="02_espaciador" reason="Adjacent"/>
+    <disable_collisions link1="placa_alta_brazo_derecho" link2="03_espaciador" reason="Adjacent"/>
+    <disable_collisions link1="placa_alta_brazo_derecho" link2="04_espaciador" reason="Adjacent"/>
+    <disable_collisions link1="placa_alta_brazo_derecho" link2="fin" reason="Adjacent"/>
+    <!--disable_collisions link1="" link2="" reason="Adjacent"/-->
+
+</robot>

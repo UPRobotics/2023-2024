@@ -1,0 +1,60 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 10 
+
+    arm_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+    flipper01_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+    flipper02_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+    
+
+arm_controller:
+  ros__parameters:
+    joints:
+      - joint_16
+    #  - joint_20
+    #  - joint_21
+    #  - joint_23
+    #  - joint_24
+
+    command_interfaces:
+      - position
+
+    state_interfaces:
+      - position
+
+    open_loop_control: true
+    allow_integration_in_goal_trajectories: true
+
+
+flipper01_controller:
+  ros__parameters:
+    joints:
+      - joint_7
+
+    command_interfaces:
+      - position
+
+    state_interfaces:
+      - position
+
+    open_loop_control: true
+    allow_integration_in_goal_trajectories: true
+
+flipper02_controller:
+  ros__parameters:
+    joints:
+      - joint_9
+
+    command_interfaces:
+      - position
+
+    state_interfaces:
+      - position
+
+    open_loop_control: true
+    allow_integration_in_goal_trajectories: true
