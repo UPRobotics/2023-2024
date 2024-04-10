@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<robot name = "ixnaminki_olinki_arm">
+    <!--group name="arm1">
+
+    </group-->
+    <group name="arm">
+        <!--joint name="virtual_joint"/>
+        <joint name="joint_15"/>
+        <joint name="joint_16"/>
+        <joint name="joint_17"/>
+        <joint name="joint_18"/>
+        <joint name="joint_19"/>
+        <joint name="joint_20"/>
+        <joint name="joint_21"/>
+        <joint name="joint_22"/>
+        <joint name="joint_23"/>
+        <joint name="joint_24"/>
+        
+        <joint name="joint_25"/>
+        <joint name="joint_26"/>
+        <joint name="joint_27"/>
+        <joint name="joint_28"/>
+
+        <joint name="joint_29"/-->
+
+        <!--joint name="joint_21"/>
+        <joint name="joint_20"/>
+        <joint name="joint_23"/>
+        
+        <link name = "base_link"/>
+        <link name = "base_link_arm"/>
+        <link name = "rotation_base"/>
+
+        <link name="eje_brazo"/>
+        
+        <link name="placa_baja_brazo_izquierdo"/>
+        <link name="placa_baja_brazo_derecho"/-->
+
+
+        <!--link name="01_oreja"/>
+        <link name="02_oreja"/>
+        <link name="carcasa"/>
+        <link name="placa_alta_brazo_izquierdo"/>
+        <link name="placa_alta_brazo_derecho"/>
+        <link name="01_espaciador"/>
+        <link name="02_espaciador"/>
+        <link name="03_espaciador"/>
+        <link name="04_espaciador"/>
+        <link name="fin"/-->
+
+        <chain base_link="base_link" tip_link="rotative_arm"/>
+        <!--chain base_link="base_link" tip_link="fin"/-->
+
+    </group>
+    <group_state name="home" group="arm">
+        <joint name="joint_base_rot" value="0"/>
+        <joint name="joint_lower" value="0"/>
+        <joint name="joint_upper" value="0"/>
+        <joint name="joint_rotative" value="0"/>
+    </group_state>
+    
+    <disable_collisions link1="base_link" link2="rotative_base" reason="Adjacent"/>
+    <disable_collisions link1="rotative_base" link2="lower_arm" reason="Adjacent"/>
+    <disable_collisions link1="lower_arm" link2="upper_arm" reason="Adjacent"/>
+    <disable_collisions link1="upper_arm" link2="rotative_arm" reason="Adjacent"/>
+
+
+    <disable_collisions link1="base_link" link2="lower_arm" reason="Never"/>
+    <disable_collisions link1="base_link" link2="upper_arm" reason="Never"/>
+    <disable_collisions link1="base_link" link2="rotative_arm" reason="Never"/>
+
+
+    <disable_collisions link1="rotative_base" link2="upper_arm" reason="Never"/>
+    <disable_collisions link1="rotative_base" link2="rotative_arm" reason="Never"/>
+
+    <disable_collisions link1="lower_arm" link2="rotative_arm" reason="Never"/>
+
+
+</robot>
