@@ -3,3 +3,4 @@ initial_positions:
   joint_lower: 0
   joint_upper: 0
   joint_rotative: 0
+  joint_wrist: 0

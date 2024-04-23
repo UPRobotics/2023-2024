@@ -13,6 +13,7 @@ moveit_simple_controller_manager:
       - joint_lower
       - joint_upper
       - joint_rotative
+      - joint_wrist
     #  - joint_20
     #  - joint_21
     #  - joint_23

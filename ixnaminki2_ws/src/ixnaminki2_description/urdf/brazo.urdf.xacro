@@ -139,7 +139,7 @@
     <link name="wrist">
         <xacro:default_inertial mass="1.0"/>
         <visual>
-            <origin xyz="${-esc*297.72} ${-esc*510.0} ${-esc*200.0}" rpy="0.0 -0.25 0.6"/>
+            <origin xyz="${-esc*280} ${-esc*510.0} ${-esc*200.0}" rpy="0.0 -0.25 0.6"/>
             <geometry>
                 <mesh filename="package://ixnaminki2_description/3DModels/BRAZO/Wrist.STL" scale="${escala}"/>
             </geometry>
@@ -158,19 +158,74 @@
     <link name="gripper_base">
         <xacro:default_inertial mass="1.0"/>
         <visual>
-            <origin xyz="${esc*5} ${-esc*40} ${-esc*50}" rpy="0.0 0.0 0.0"/>
+            <origin xyz="${esc*0} ${-esc*47.5} ${esc*17}" rpy="${PI} 0.0 1.570795"/>
             <geometry>
-                <mesh filename="package://ixnaminki2_description/3DModels/BRAZO/gripperFixed.STL" scale="${escala}"/>
+                <mesh filename="package://ixnaminki2_description/3DModels/BRAZO/gripperFixed_.STL" scale="${escala}"/>
             </geometry>
             <material name="base05"/>
         </visual>
         <collision>
-            <origin xyz="${-esc*0} ${-esc*0} ${-esc*0}" rpy="0.0 -0.25 0.57"/>
+            <origin xyz="${esc*0} ${-esc*47.5} ${esc*17}" rpy="${PI} 0.0 1.570795"/>
             <geometry>
-                <mesh filename="package://ixnaminki2_description/3DModels/BRAZO/gripperFixed.STL" scale="${escala}"/>
+                <mesh filename="package://ixnaminki2_description/3DModels/BRAZO/gripperFixed_.STL" scale="${escala}"/>
             </geometry>
         </collision>
     </link>
+
+
+    <link name="link_fingerL">
+        <xacro:default_inertial mass="1.0"/>
+        <visual>
+            <origin xyz="${-esc*13.5} ${esc*30.0} 0.0" rpy="0.0 0.0 ${-PI/2}"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/BRAZO/Assem1.STL" scale="${escala}"/>
+            </geometry>
+            <material name="base05"/>
+        </visual>
+        <collision>
+            <origin xyz="${-esc*13.5} ${esc*30.0} 0.0" rpy="0.0 0.0 ${-PI/2}"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/BRAZO/Assem1.STL" scale="${escala}"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="link_fingerR">
+        <xacro:default_inertial mass="1.0"/>
+        <visual>
+            <origin xyz="${-esc*13.5} ${-esc*30.0} 0.0" rpy="0.0 ${PI} ${-PI/2}"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/BRAZO/Assem1.STL" scale="${escala}"/>
+            </geometry>
+            <material name="base05"/>
+        </visual>
+        <collision>
+            <origin xyz="${-esc*13.5} ${esc*30.0} 0.0" rpy="0.0 0.0 ${-PI/2}"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/BRAZO/Assem1.STL" scale="${escala}"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="barra">
+        <xacro:default_inertial mass = "1.0"/>
+        <visual>
+            <origin xyz="0 ${-esc*49} ${-esc*15}" rpy="0 0 ${PI/2}"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/BRAZO/BARRA_CENTRAL.STL" scale="${escala}"/>
+            </geometry>
+            <material name="base06">
+                <texture filename="package://ixnaminki2_description/3DModels/plata-viejo.jpg"/>
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 ${-esc*49} 0" rpy="0 0 ${PI/2}"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/BRAZO/BARRA_CENTRAL.STL" scale="${escala}"/>
+            </geometry>
+        </collision>
+    </link>
+
 
 <!-- JOINTS  -->
 
@@ -187,12 +242,13 @@
         <limit lower="-3.0" upper="3.0" effort="1.0" velocity="5.0"/>
     </joint>
 
+    
     <joint name="joint_lower" type="revolute">
         <parent link="rotative_base"/>
         <child link="lower_arm"/>
         <origin xyz="0.0 0.0 ${esc*74}" rpy="0.0 0.0 0.3"/>
         <axis xyz="0 1 0"/>
-        <limit lower="-3.0" upper="3.0" effort="1.0" velocity="5.0"/>
+        <limit lower="-1.7" upper="1.3" effort="1.0" velocity="5.0"/>
     </joint>
 
     <joint name="joint_upper" type="revolute">
@@ -200,7 +256,7 @@
         <child link="upper_arm"/>
         <origin xyz="${esc*255.14} 0.0 ${esc*405.5}" rpy="0.0 0.0 0.0"/>
         <axis xyz="0 1 0"/>
-        <limit lower="-3.0" upper="3.0" effort="1.0" velocity="5.0"/>
+        <limit lower="-2.0" upper="1.1" effort="1.0" velocity="5.0"/>
     </joint>
     <joint name="joint_rotative" type="revolute">
         <parent link="upper_arm"/>
@@ -210,7 +266,7 @@
         <limit lower="-3.0" upper="3.0" effort="1.0" velocity="5.0"/>
     </joint>
 
-    <joint name="joint_extend_wrist" type="revolute">
+    <joint name="joint_wrist" type="revolute">
         <parent link="rotative_arm"/>
         <child link="wrist"/>
         <origin xyz="${esc*176} 0 0" rpy="0 0 0"/>
@@ -221,12 +277,45 @@
     <joint name="joint_wrist_gripper" type="fixed">
         <parent link="wrist"/>
         <child link="gripper_base"/>
-        <origin xyz="${esc*35} ${-esc*0} ${-esc*30}" rpy="0 0.8 0.0"/>
+        <origin xyz="${esc*47.97} ${-esc*0} ${-esc*30}" rpy="0 0.8 0.0"/>
     </joint> 
+
+    <joint name="joint_finger" type="fixed"> <!--type="revolute"-->
+        <parent link="gripper_base"/>
+        <child link="link_fingerL"/>
+        <origin xyz="${esc*81} ${-esc*30} 0" rpy="0 0 0"/>
+        <!--axis xyz="0 0 1"/>
+        <limit lower="-0.6" upper="0.0" effort="1.0" velocity="5.0"/-->
+    </joint>
+
+
+    <joint name ="joint_finger_mimic" type="fixed"> <!--type="revolute"-->
+        <parent link="gripper_base"/>
+        <child link = "link_fingerR"/>
+        <origin xyz="${esc*81} ${esc*30} 0" rpy="0 0 0"/>
+        <!--axis xyz="0 0 1"/>
+        <mimic joint="joint_finger" multiplier="-1"/>
+        <limit lower="0.0" upper="1.0" effort="1.0" velocity="5.0"/-->
+    </joint>
+
+    <joint name="joint_barra"  type="fixed"> <!--type="prismatic"-->
+        <parent link="gripper_base"/>
+        <child link="barra"/>
+        <origin xyz="${esc*142.5} 0 0" rpy="0 0 0"/>
+        <!--axis xyz="1.0 0.0 0.0"/>
+        <mimic joint="joint_finger" multiplier="0.0715"/>
+        <limit lower="${-esc*33}" upper="0.0" effort="1.0" velocity="5.0"/-->
+    </joint>
+
+
+
+
+
 
     <xacro:default_transmission number="base_rot"/>
     <xacro:default_transmission number="lower"/>
     <xacro:default_transmission number="upper"/>
     <xacro:default_transmission number="rotative"/>
+    <xacro:default_transmission number="wrist"/>
 
 </robot>
