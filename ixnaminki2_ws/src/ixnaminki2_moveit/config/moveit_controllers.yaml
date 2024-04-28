@@ -3,6 +3,7 @@ moveit_controller_manager: moveit_simple_controller_manager/MoveItSimpleControll
 moveit_simple_controller_manager:
   controller_names:
     - arm_controller
+    - gripper_controller
 
   arm_controller:
     action_ns: follow_joint_trajectory
@@ -14,7 +15,11 @@ moveit_simple_controller_manager:
       - joint_upper
       - joint_rotative
       - joint_wrist
-    #  - joint_20
-    #  - joint_21
-    #  - joint_23
-    #  - joint_24
+  
+  gripper_controller:
+    action_ns: forward_command_controller
+    type: ForwardCommandController
+    default: true
+    joints:
+      - joint_finger
+      - joint_finger_mimic

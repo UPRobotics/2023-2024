@@ -200,31 +200,31 @@
             <material name="base05"/>
         </visual>
         <collision>
-            <origin xyz="${-esc*13.5} ${esc*30.0} 0.0" rpy="0.0 0.0 ${-PI/2}"/>
+            <origin xyz="${-esc*13.5} ${-esc*30.0} 0.0" rpy="0.0 ${PI} ${-PI/2}"/>
             <geometry>
                 <mesh filename="package://ixnaminki2_description/3DModels/BRAZO/Assem1.STL" scale="${escala}"/>
             </geometry>
         </collision>
     </link>
 
-    <link name="barra">
+    <!--link name="barra">
         <xacro:default_inertial mass = "1.0"/>
         <visual>
             <origin xyz="0 ${-esc*49} ${-esc*15}" rpy="0 0 ${PI/2}"/>
             <geometry>
                 <mesh filename="package://ixnaminki2_description/3DModels/BRAZO/BARRA_CENTRAL.STL" scale="${escala}"/>
             </geometry>
-            <material name="base06">
+            <material name="base05"/>
                 <texture filename="package://ixnaminki2_description/3DModels/plata-viejo.jpg"/>
             </material>
         </visual>
         <collision>
-            <origin xyz="0 ${-esc*49} 0" rpy="0 0 ${PI/2}"/>
+            <origin xyz="0 ${-esc*49} ${-esc*15}" rpy="0 0 ${PI/2}"/>
             <geometry>
                 <mesh filename="package://ixnaminki2_description/3DModels/BRAZO/BARRA_CENTRAL.STL" scale="${escala}"/>
             </geometry>
         </collision>
-    </link>
+    </link-->
 
 
 <!-- JOINTS  -->
@@ -256,7 +256,7 @@
         <child link="upper_arm"/>
         <origin xyz="${esc*255.14} 0.0 ${esc*405.5}" rpy="0.0 0.0 0.0"/>
         <axis xyz="0 1 0"/>
-        <limit lower="-2.0" upper="1.1" effort="1.0" velocity="5.0"/>
+        <limit lower="-2.0" upper="1.2" effort="1.0" velocity="5.0"/>
     </joint>
     <joint name="joint_rotative" type="revolute">
         <parent link="upper_arm"/>
@@ -280,32 +280,32 @@
         <origin xyz="${esc*47.97} ${-esc*0} ${-esc*30}" rpy="0 0.8 0.0"/>
     </joint> 
 
-    <joint name="joint_finger" type="fixed"> <!--type="revolute"-->
+    <joint name="joint_finger" type="revolute">
         <parent link="gripper_base"/>
         <child link="link_fingerL"/>
         <origin xyz="${esc*81} ${-esc*30} 0" rpy="0 0 0"/>
-        <!--axis xyz="0 0 1"/>
-        <limit lower="-0.6" upper="0.0" effort="1.0" velocity="5.0"/-->
+        <axis xyz="0 0 1"/>
+        <limit lower="-0.6" upper="0.0" effort="1.0" velocity="5.0"/>
     </joint>
 
 
-    <joint name ="joint_finger_mimic" type="fixed"> <!--type="revolute"-->
+    <joint name ="joint_finger_mimic" type="revolute">
         <parent link="gripper_base"/>
         <child link = "link_fingerR"/>
         <origin xyz="${esc*81} ${esc*30} 0" rpy="0 0 0"/>
-        <!--axis xyz="0 0 1"/>
+        <axis xyz="0 0 1"/>
         <mimic joint="joint_finger" multiplier="-1"/>
-        <limit lower="0.0" upper="1.0" effort="1.0" velocity="5.0"/-->
+        <limit lower="0.0" upper="1.0" effort="1.0" velocity="5.0"/>
     </joint>
 
-    <joint name="joint_barra"  type="fixed"> <!--type="prismatic"-->
+    <!--joint name="joint_barra"  type="prismatic">
         <parent link="gripper_base"/>
         <child link="barra"/>
         <origin xyz="${esc*142.5} 0 0" rpy="0 0 0"/>
-        <!--axis xyz="1.0 0.0 0.0"/>
+        <axis xyz="1.0 0.0 0.0"/>
         <mimic joint="joint_finger" multiplier="0.0715"/>
-        <limit lower="${-esc*33}" upper="0.0" effort="1.0" velocity="5.0"/-->
-    </joint>
+        <limit lower="${-esc*33}" upper="0.0" effort="1.0" velocity="5.0"/>
+    </joint-->
 
 
 
@@ -317,5 +317,8 @@
     <xacro:default_transmission number="upper"/>
     <xacro:default_transmission number="rotative"/>
     <xacro:default_transmission number="wrist"/>
+    <xacro:default_transmission number="finger"/>
+    <xacro:default_transmission number="finger_mimic"/>
+    <!--xacro:default_transmission number="barra"/-->
 
 </robot>

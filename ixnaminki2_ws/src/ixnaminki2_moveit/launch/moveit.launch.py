@@ -34,7 +34,7 @@ def generate_launch_description():
         executable="move_group",
         output="screen",
         parameters=[moveit_config.to_dict(), 
-                    {'use_sim_time': is_sim},
+                    {'use_sim_time': True},
                     {'publish_robot_description_semantic': True}],
         arguments=["--ros-args", "--log-level", "info"],
     )
@@ -56,6 +56,7 @@ def generate_launch_description():
             moveit_config.robot_description_semantic,
             moveit_config.robot_description_kinematics,
             moveit_config.joint_limits,
+            {'use_sim_time': True},
         ],
     )
 

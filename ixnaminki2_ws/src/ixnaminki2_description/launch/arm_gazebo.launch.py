@@ -33,7 +33,10 @@ def generate_launch_description():
     robot_state_publisher_node = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
-        parameters=[{'robot_description': robot_description}]
+        parameters=[
+            {'robot_description': robot_description},         
+            {'use_sim_time': True},
+        ]
     )
 
     start_gazebo_server = IncludeLaunchDescription(
@@ -48,11 +51,16 @@ def generate_launch_description():
         )
     )
 
-    spawn_robot = Node(package='gazebo_ros', executable='spawn_entity.py',
-                        arguments=['-entity', 'ixnaminki_olinki_arm',
-                                   '-topic', 'robot_description',
-                                  ],
-                        output='screen'
+    spawn_robot = Node(
+        package='gazebo_ros', 
+        executable='spawn_entity.py',
+        arguments=['-entity', 'ixnaminki_olinki_arm',
+                    '-topic', 'robot_description',
+                    ],
+        output='screen',
+        parameters=[
+            {'use_sim_time': True},
+        ]
     )
 
     return LaunchDescription([

@@ -22,12 +22,18 @@ def generate_launch_description():
     robot_state_publisher_node = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
-        parameters=[{'robot_description': robot_description}]
+        parameters=[
+            {'robot_description': robot_description},
+            {'use_sim_time': True},
+        ]
     )
 
     joint_state_publisher_gui_node = Node(
         package='joint_state_publisher_gui',
-        executable='joint_state_publisher_gui'
+        executable='joint_state_publisher_gui',
+        parameters=[
+            {'use_sim_time': True},
+        ]
     )
 
     rviz_node = Node(
@@ -35,7 +41,9 @@ def generate_launch_description():
         executable='rviz2',
         name='rviz2',
         output='screen',
-      arguments=['-d', os.path.join(ixnaminki_description_dir, 'rviz', 'arm.rviz')],
+        arguments=[
+            {'-d', os.path.join(ixnaminki_description_dir, 'rviz', 'arm.rviz')}, 
+            {'use_sim_time': True},],
     )
 
     return LaunchDescription([

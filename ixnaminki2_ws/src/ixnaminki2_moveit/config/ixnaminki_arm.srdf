@@ -2,22 +2,27 @@
 
 
 <robot name = "ixnaminki_olinki_arm">
-    <!--group name="arm1">
-
-    </group-->
     <group name="arm">
-
         <chain base_link="base_link" tip_link="gripper_base"/>
-        <!--chain base_link="base_link" tip_link="fin"/-->
-
     </group>
+
+    <group name="gripper">
+        <joint name="joint_finger"/>
+        <joint name="joint_finger_mimic"/>
+        <!--joint name="joint_barra"/-->
+    </group>
+
+
     <group_state name="home" group="arm">
         <joint name="joint_base_rot" value="0"/>
         <joint name="joint_lower" value="0"/>
         <joint name="joint_upper" value="0"/>
         <joint name="joint_rotative" value="0"/>
         <joint name="joint_wrist" value="0"/>
-        <!--joint name="gripper_base"/-->
+    </group_state>
+
+    <group_state name="home" group="gripper">
+        <joint name="joint_finger" value="0"/>
     </group_state>
     
     <disable_collisions link1="base_link" link2="rotative_base" reason="Adjacent"/>
@@ -28,8 +33,8 @@
     <disable_collisions link1="wrist" link2="gripper_base" reason="Adjacent"/>
     <disable_collisions link1="gripper_base" link2="link_fingerL" reason="Adjacent"/>
     <disable_collisions link1="gripper_base" link2="link_fingerR" reason="Adjacent"/>
-    <disable_collisions link1="barra" link2="link_fingerL" reason="Adjacent"/>
-    <disable_collisions link1="barra" link2="link_fingerR" reason="Adjacent"/>
+    <!--disable_collisions link1="barra" link2="link_fingerL" reason="Adjacent"/>
+    <disable_collisions link1="barra" link2="link_fingerR" reason="Adjacent"/-->
 
 
     <disable_collisions link1="base_link" link2="lower_arm" reason="Never"/>
@@ -37,7 +42,7 @@
     <disable_collisions link1="base_link" link2="rotative_arm" reason="Never"/>
     <disable_collisions link1="base_link" link2="wrist" reason="Never"/>
     <disable_collisions link1="base_link" link2="gripper_base" reason="Never"/>
-    <disable_collisions link1="base_link" link2="barra" reason="Never"/>
+    <!--disable_collisions link1="base_link" link2="barra" reason="Never"/-->
     <disable_collisions link1="base_link" link2="link_fingerL" reason="Never"/>
     <disable_collisions link1="base_link" link2="link_fingerR" reason="Never"/>
 
@@ -46,33 +51,33 @@
     <disable_collisions link1="rotative_base" link2="rotative_arm" reason="Never"/>
     <disable_collisions link1="rotative_base" link2="wrist" reason="Never"/>
     <disable_collisions link1="rotative_base" link2="gripper_base" reason="Never"/>
-    <disable_collisions link1="rotative_base" link2="barra" reason="Never"/>
+    <!--disable_collisions link1="rotative_base" link2="barra" reason="Never"/-->
     <disable_collisions link1="rotative_base" link2="link_fingerL" reason="Never"/>
     <disable_collisions link1="rotative_base" link2="link_fingerR" reason="Never"/>
 
     <disable_collisions link1="lower_arm" link2="rotative_arm" reason="Never"/>
     <disable_collisions link1="lower_arm" link2="wrist" reason="Never"/>
     <disable_collisions link1="lower_arm" link2="gripper_base" reason="Never"/>
-    <disable_collisions link1="lower_arm" link2="barra" reason="Never"/>
+    <!--disable_collisions link1="lower_arm" link2="barra" reason="Never"/-->
     <disable_collisions link1="lower_arm" link2="link_fingerL" reason="Never"/>
     <disable_collisions link1="lower_arm" link2="link_fingerR" reason="Never"/>
 
     <disable_collisions link1="upper_arm" link2="wrist" reason="Never"/>
     <disable_collisions link1="upper_arm" link2="gripper_base" reason="Never"/>
-    <disable_collisions link1="upper_arm" link2="barra" reason="Never"/>
+    <!--disable_collisions link1="upper_arm" link2="barra" reason="Never"/-->
     <disable_collisions link1="upper_arm" link2="link_fingerL" reason="Never"/>
     <disable_collisions link1="upper_arm" link2="link_fingerR" reason="Never"/>
 
     <disable_collisions link1="rotative_arm" link2="gripper_base" reason="Never"/>
-    <disable_collisions link1="rotative_arm" link2="barra" reason="Never"/>
+    <!--disable_collisions link1="rotative_arm" link2="barra" reason="Never"/-->
     <disable_collisions link1="rotative_arm" link2="link_fingerL" reason="Never"/>
     <disable_collisions link1="rotative_arm" link2="link_fingerR" reason="Never"/>
 
-    <disable_collisions link1="wrist" link2="barra" reason="Never"/>
+    <!--disable_collisions link1="wrist" link2="barra" reason="Never"/-->
     <disable_collisions link1="wrist" link2="link_fingerL" reason="Never"/>
     <disable_collisions link1="wrist" link2="link_fingerR" reason="Never"/>
 
-    <disable_collisions link1="gripper_base" link2="barra" reason="Never"/>
+    <!--disable_collisions link1="gripper_base" link2="barra" reason="Never"/-->
 
     <disable_collisions link1="link_fingerL" link2="link_fingerR" reason="Never"/>
 
