@@ -12,6 +12,12 @@ GUI1.resizable(False, False)
 Titulo = Label(GUI1, text= "Lectura de sensores")
 Titulo.pack()
 
+PlanArmArray = []
+
+def arreglo(array):
+    for i in array:
+        PlanArmArray.append(i)
+
 def simulacion():
     botons = []
     objects = []
@@ -103,26 +109,29 @@ def simulacion():
 
         def xchange(int):
             x = str(SliderX.get())
+            return x
 
         def ychange(int):
             y = str(SliderY.get())
+            return y
 
         def zchange(int):
             z = str(SliderZ.get())
+            return z
 
         Brazo2 = Frame(GUI1, bg = "lightblue")
         Brazo2.place(x = 10, y = 650, width = 500, height = 100)
 
-        SliderX = Scale(Brazo, from_ = 0, to = 180, orient = HORIZONTAL, command = xchange, length = 300)
+        SliderX = Scale(Brazo, from_ = -700, to = 700, orient = HORIZONTAL, command = xchange, length = 300)
         SliderX.pack(pady = 8)
 
-        SliderY = Scale(Brazo, from_ = 0, to = 180, orient = HORIZONTAL, command = ychange, length = 300)
+        SliderY = Scale(Brazo, from_ = -700, to = 700, orient = HORIZONTAL, command = ychange, length = 300)
         SliderY.pack(pady = 8)
 
-        SliderZ = Scale(Brazo, from_ = 0, to = 180, orient = HORIZONTAL, command = zchange, length = 300)
+        SliderZ = Scale(Brazo, from_ = 0, to = 700, orient = HORIZONTAL, command = zchange, length = 300)
         SliderZ.pack(pady = 8)
 
-        Simular = Button(Brazo2, text = "Simular", command = SimularBrazo)
+        Simular = Button(Brazo2, text = "Simular", command = SimularBrazo(xchange, ychange, zchange))
         Mover = Button(Brazo2, text = "Mover", command = MoverBrazo)
         Simular.place(relx = .15, rely = 0.25, relwidth = .25, relheight = .5)
         Mover.place(relx = .60, rely = 0.25, relwidth = .25, relheight = .5)
@@ -164,7 +173,6 @@ def simulacion():
         ClawBtn3.place(relx = 0.2, rely = 0.69, relwidth = 0.6, relheight = 0.25)
 
 
-
     def Launcher():
         cd1 = "cd"
         subprocess.run(cd1, shell=True)
@@ -175,6 +183,18 @@ def simulacion():
         source = "source install/local_setup.bash"
         subprocess.run(source, shell=True)
         launch1 = "ros2 launch ixnaminki_description display.launch.py"
+        subprocess.run(launch1, shell=True)
+
+    def Simular(x,y,z):
+        cd1 = "cd"
+        subprocess.run(cd1, shell=True)
+        cd2 = "cd .."
+        subprocess.run(cd2, shell=True)
+        cd = "ls"
+        subprocess.run(cd, shell=True)
+        source = "source install/local_setup.bash"
+        subprocess.run(source, shell=True)
+        launch1 = "ros2 run ixnaminki2_remote plan_client %d" %(x,y,z)
         subprocess.run(launch1, shell=True)
 
     def OpClaw():
