@@ -6,6 +6,8 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 
+include_directories(include)
+
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(formatos)
@@ -13,6 +15,7 @@ find_package(formatos)
 
 add_executable(move_server src/movimiento.cpp)
 ament_target_dependencies(move_server rclcpp formatos)
+ament_target_dependencies(move_server rclcpp)
 
 
 add_executable(sensor_pub src/sensorData.cpp) 
