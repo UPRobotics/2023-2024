@@ -244,10 +244,10 @@ int main(int argc, char ** argv){
 
     auto joy_sub = nodes->create_subscription<sensor_msgs::msg::Joy>("/joy",10,joyCallback);
 
-	node = rclcpp::Node::make_shared("reader_client");
+	node = rclcpp::Node::make_shared("ixnaminki_olinki_move_robot");
 
-	clientRob = node->create_client<formatos::srv::Moverob>("direcciones");	
-	clientArm = node->create_client<formatos::srv::Movearm>("direcciones");	
+	clientRob = node->create_client<formatos::srv::Moverob>("move_robot");	
+	//clientArm = node->create_client<formatos::srv::Movearm>("direcciones");	
 
     rclcpp::spin(nodes);
 
