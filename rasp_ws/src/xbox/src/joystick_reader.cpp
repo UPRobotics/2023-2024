@@ -42,17 +42,16 @@ rclcpp::Client<formatos::srv::Movearm>::SharedPtr clientArm;
 void MoveRob(std::vector<double> &axis, std::vector<bool> &botons){
     int r=0, r2=0, flipper=0;
 
-    if(axis[1]<=1.0 && axis[1]>0.2) r = std::min(0 + (int)(axis[1] * 100), 99);
-    if(axis[1]>=-1.0 && axis[1]<-0.25) r2 = std::min(0 + (int)(axis[1] * -100), 99);
-    if(axis[0]<=1.0 && axis[0]>0.25) r = std::min(100 + (int)(axis[0] * 100), 199);
-    if(axis[0]>=-1.0 && axis[0]<-0.25) r2 = std::min(100 + (int)(axis[0] * -100), 199);
-    if(r==0 && r2==0 && axis[3]>=-1.0 && axis[3]<=-0.25) flipper  = 1;
-    else if(axis[3]<=1.0 && axis[3]>=0.25) flipper  = 2;
-    else if(axis[4]>=-1.0 && axis[4]<=-0.25) flipper  = 3;
-    else if(axis[4]<=1.0 && axis[4]>=0.25) flipper  = 4;
-
-    if(r==0 && r2==0 && flipper==0){
-        if(was_cero)  return;
+    if((axis[1]<=1.0 && axis[1]>0.2) || (axis[1]>=-1.0 && axis[1]<-0.2)){ 
+        r = 1;  
+        r2 = axis[1];
+    }// hacia adelante y atras
+    else if((axis[0]<=1.0 && axis[0]>0.2) || (axis[0]>=-1.0 && axis[0]<-0.2) ){ 
+        r = 2;  
+        r2 = axis[0];
+    }// hacia izquierda
+    if(r==0){
+        if(was_cero) return;
 	    was_cero=true;
     }else{
 	    was_cero=false;
