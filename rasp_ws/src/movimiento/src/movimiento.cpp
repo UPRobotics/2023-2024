@@ -1,6 +1,7 @@
 #include "rclcpp/rclcpp.hpp"
-#include "formatos/srv/movearm.hpp"
-#include "formatos/srv/moverob.hpp"
+#include "rcl_interfaces/srv/set_parameters.hpp"
+#include "formatosa/srv/movearm.hpp"
+#include "formatosa/srv/moverob.hpp"
 #include "movimiento/myserial.hpp"
 #include <string>
 #include <memory>
@@ -117,9 +118,22 @@ void VescUartSetDuty(float duty, int motor_index) {
 double current_motor_velocity[4]={0.0,0.0,0.0,0.0};
 const double incremento = 0.1;
 
-void subscriber_functionR(double r1, double r2, int flippers){
+void subscriber_functionR(double r1, double r2, double flippers){
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "moviendo robot");
     
+	if(flippers!=0){
+		if(flippers==1){
+			VescUartSetDuty(0.2, 2);
+		}else if(flippers==2){
+			VescUartSetDuty(-0.2, 2);
+		}else if(flippers==3){
+			VescUartSetDuty(0.2, 3);
+		}else{
+			VescUartSetDuty(-0.2, 3);
+		}
+		return;
+	}
+
     double r[2] = {r2, r2};
     if(r1==2) r[1] *= -1.0;
 
@@ -138,13 +152,13 @@ void subscriber_functionR(double r1, double r2, int flippers){
 }
 
 
-void addR(const std::shared_ptr<formatos::srv::Moverob::Request> request,
-          std::shared_ptr<formatos::srv::Moverob::Response> response)
+void addR(const std::shared_ptr<rcl_interfaces::srv::SetParameters::Request> request,
+	std::shared_ptr<rcl_interfaces::srv::SetParameters::Response> response)
 {
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), 
         "Informacion recibida:\nd1: %d\nd2:: %d\nflippers: %d",
-                request->d1, request->d2, request->flippers);
-    subscriber_functionR(request->d1, request->d2, request->flippers);         
+                request->parameters[0].value.double_array_value[0], request->parameters[0].value.double_array_value[1], request->parameters[0].value.double_array_value[2]);
+    subscriber_functionR(request->parameters[0].value.double_array_value[0], request->parameters[0].value.double_array_value[1], request->parameters[0].value.double_array_value[2]);        
   
 }
 
@@ -156,8 +170,8 @@ void subscriber_functionA(){
 }
 
 
-void addA(const std::shared_ptr<formatos::srv::Movearm::Request> request,
-          std::shared_ptr<formatos::srv::Movearm::Response> response)
+void addA(const std::shared_ptr<formatosa::srv::Movearm::Request> request,
+          std::shared_ptr<formatosa::srv::Movearm::Response> response)
 {
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Informacion recibida");
     for(int i = 0; i < 6; i++){
@@ -177,11 +191,10 @@ int main(int argc, char **argv)
 
     std::shared_ptr<rclcpp::Node> move = rclcpp::Node::make_shared("ixnaminki_server_move_robot");
 
-    rclcpp::Service<formatos::srv::Moverob>::SharedPtr serviceR =
-        move->create_service<formatos::srv::Moverob>("move_robot", &addR);
+    rclcpp::Service<rcl_interfaces::srv::SetParameters>::SharedPtr serviceR = move->create_service<rcl_interfaces::srv::SetParameters>("move_robot", &addR);
 
-    rclcpp::Service<formatos::srv::Movearm>::SharedPtr serviceA =
-        move->create_service<formatos::srv::Movearm>("move_arm", &addA);
+    /*rclcpp::Service<formatosa::srv::Movearm>::SharedPtr serviceA =
+        move->create_service<formatosa::srv::Movearm>("move_arm", &addA);*/
 
 
     rclcpp::spin(move);

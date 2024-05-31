@@ -3,8 +3,9 @@
 
 
 #include "std_srvs/srv/set_bool.hpp"
-#include "formatos/srv/moverob.hpp"
-#include "formatos/srv/movearm.hpp"
+#include "rcl_interfaces/srv/set_parameters.hpp"
+#include "formatosa/srv/moverob.hpp"
+#include "formatosa/srv/movearm.hpp"
 
 #include <vector>
 #include <stdlib.h>
@@ -36,11 +37,13 @@ void addCM(const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
 
 std::shared_ptr<rclcpp::Node> node;
 
-rclcpp::Client<formatos::srv::Moverob>::SharedPtr clientRob;
-rclcpp::Client<formatos::srv::Movearm>::SharedPtr clientArm;
+rclcpp::Client<rcl_interfaces::srv::SetParameters>::SharedPtr clientRob;
+rclcpp::Client<formatosa::srv::Movearm>::SharedPtr clientArm;
 
 void MoveRob(std::vector<double> &axis, std::vector<bool> &botons){
-    int r=0, r2=0, flipper=0;
+    double r=0, r2=0, flipper=0;
+
+
 
     if((axis[1]<=1.0 && axis[1]>0.2) || (axis[1]>=-1.0 && axis[1]<-0.2)){ 
         r = 1;  
@@ -57,11 +60,14 @@ void MoveRob(std::vector<double> &axis, std::vector<bool> &botons){
 	    was_cero=false;
     }
 
-    auto request = std::make_shared<formatos::srv::Moverob::Request>();
+    auto request = std::make_shared<rcl_interfaces::srv::SetParameters::Request>();
+    
+    request->parameters.resize(1);
+    request->parameters[0].value.double_array_value.resize(3);
 
-    request->d1 = r;
-    request->d2 = r2;
-    request->flippers = flipper;
+    request->parameters[0].value.double_array_value[0] = r;
+    request->parameters[0].value.double_array_value[1] = r2;
+    request->parameters[0].value.double_array_value[2] = flipper;
 
 
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "sending: r1=[%d]        r2=[%d]       flipper=[%d]", r, r2, flipper);
@@ -79,7 +85,7 @@ void MoveArm(std::vector<double> &axis, std::vector<bool> &botons){
     std::vector<float> armi(6, 0);
     //establecer que botones hacen que  cosass
     
-    auto request = std::make_shared<formatos::srv::Movearm::Request>();
+    auto request = std::make_shared<formatosa::srv::Movearm::Request>();
 
     bool z = true;
     for(int i = 0; i < 6; i++){
@@ -246,8 +252,8 @@ int main(int argc, char ** argv){
 
 	node = rclcpp::Node::make_shared("ixnaminki_olinki_move_robot");
 
-	clientRob = node->create_client<formatos::srv::Moverob>("move_robot");	
-	//clientArm = node->create_client<formatos::srv::Movearm>("direcciones");	
+	clientRob = node->create_client<rcl_interfaces::srv::SetParameters>("move_robot");	
+	//clientArm = node->create_client<formatosa::srv::Movearm>("direcciones");	
 
     rclcpp::spin(nodes);
 

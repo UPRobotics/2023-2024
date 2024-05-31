@@ -10,21 +10,22 @@ include_directories(include)
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(formatos)
-
+find_package(formatosa)
+find_package(rcl_interfaces  REQUIRED)
 
 add_executable(move_server src/movimiento.cpp)
-ament_target_dependencies(move_server rclcpp formatos)
+ament_target_dependencies(move_server rclcpp formatosa)
+ament_target_dependencies(move_server rclcpp rcl_interfaces)
 ament_target_dependencies(move_server rclcpp)
 
 
-add_executable(sensor_pub src/sensorData.cpp) 
-ament_target_dependencies(sensor_pub rclcpp formatos)
+#add_executable(sensor_pub src/sensorData.cpp) 
+#ament_target_dependencies(sensor_pub rclcpp formatosa)
 
 
 install(TARGETS
   move_server
-  sensor_pub
+ # sensor_pub
   DESTINATION lib/${PROJECT_NAME}
 
 )
