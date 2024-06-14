@@ -1,4 +1,9 @@
-#include "myserial.hpp"
+// CORRAN ESTE COMANDO
+// sudo apt-get install libboost-all-dev
+// g++ -o pruebaEthernet movimientoEthernet.cpp -lboost_system
+
+
+#include "mysocket.hpp"
 #include <string>
 #include <memory>
 #include <string.h>
@@ -10,9 +15,12 @@
 #include <algorithm>
 #include <stdio.h>
 
+#include <boost/asio.hpp>
+
+using boost::asio::ip::tcp;
+
 const int COMM_SET_DUTY = 5;
 const int COMM_SET_CURRENT = 6;
-std::string motor_indexes[4]={"/dev/ttyACM0", "/dev/ttyACM1", "/dev/ttyACM2", "/dev/ttyACM3"};
 
 const unsigned short crc16_tab[] = { 0x0000, 0x1021, 0x2042, 0x3063, 0x4084,
 		0x50a5, 0x60c6, 0x70e7, 0x8108, 0x9129, 0xa14a, 0xb16b, 0xc18c, 0xd1ad,
@@ -53,7 +61,7 @@ unsigned short crc16(unsigned char *buf, unsigned int len) {
 	return cksum;
 }
 
-int PackSendPayload(uint8_t* payload, int lenPay, int num, int motor_index, mySerial &serial) {
+int PackSendPayload(uint8_t* payload, int lenPay, int num, int motor_index, tcp::socket &socket) {
 	uint16_t crcPayload = crc16(payload, lenPay);
 	//std::cout<<crcPayload<<" : ";
 	int count = 0;
@@ -80,11 +88,13 @@ int PackSendPayload(uint8_t* payload, int lenPay, int num, int motor_index, mySe
 
 
 #ifdef DEBUG
-	DEBUGSERIAL.print("UART package send: "); SerialPrint(messageSend, count);
+	DEBUGsocket.print("UART package send: "); socketPrint(messageSend, count);
 
 #endif // DEBUG*/
 
-	bool respuesta = serial.Send(messageSend, count);
+
+    boost::asio::write(socket, boost::asio::buffer(messageSend));
+
 	return count;
 }
 
@@ -99,7 +109,7 @@ void buffer_append_int32(uint8_t* buffer, int32_t number, int32_t *index) {
 
 
 
-void VescUartSetDuty(float duty, int num, int motor_index, mySerial &serial) {
+void VescUartSetDuty(float duty, int num, int motor_index, tcp::socket &socket) {
 	int32_t index = 0;
 	uint8_t payload[6];
 
@@ -108,39 +118,42 @@ void VescUartSetDuty(float duty, int num, int motor_index, mySerial &serial) {
 	//std::cout<<payload<<"---";
 	buffer_append_int32(payload, (int32_t)(duty * 100000), &index);
 	//std::cout<<"a";
-	PackSendPayload(payload, 6, num, 0, serial);
+	PackSendPayload(payload, 6, num, 0, socket);
 }
-void VescUartSetDuty(float duty, int motor_index, mySerial &serial) {
-	VescUartSetDuty(duty, 0, motor_index, serial);
+void VescUartSetDuty(float duty, int motor_index, tcp::socket &socket) {
+	VescUartSetDuty(duty, 0, motor_index, socket);
 }
 
 
 
-void VescUartSetCurrent(float current, int num, int motor_index, mySerial &serial) {
+void VescUartSetCurrent(float current, int num, int motor_index, tcp::socket &socket) {
 	int32_t index = 0;
 	uint8_t payload[6];
 
 	payload[index++] = COMM_SET_CURRENT ;
 	payload[index++] = uint8_t(motor_index);
 	buffer_append_int32(payload, (int32_t)(current * 1000), &index);
-	PackSendPayload(payload, 6, num, 0, serial);
+	PackSendPayload(payload, 6, num, 0, socket);
 }
-void VescUartSetCurrent(float current, int motor_index, mySerial &serial){
-	VescUartSetCurrent(current, 0, motor_index, serial);
+void VescUartSetCurrent(float current, int motor_index, tcp::socket &socket){
+	VescUartSetCurrent(current, 0, motor_index, socket);
 }
 
 
 
 int main()
 {
+    boost::asio::io_context io_context;
 
-    mySerial serial("/dev/ttyACM0",115200);
-	//while(true){
-	//	for(int i = 0; i <= 256; i++){
-			VescUartSetDuty(0.8, 48, serial);
-			std::this_thread::sleep_for(std::chrono::milliseconds());
-	//	}
-	//}
-	serial.Close();
+    tcp::resolver resolver(io_context);
+    tcp::resolver::results_type endpoints = resolver.resolve("192.168.1.254", "12345");
+
+    tcp::socket socket(io_context);
+    boost::asio::connect(socket, endpoints);
+    std::cout<<"coneccion exitosa\n";
+
+	VescUartSetCurrent(50, 48, socket);
+
+
 	return 0;
 }
