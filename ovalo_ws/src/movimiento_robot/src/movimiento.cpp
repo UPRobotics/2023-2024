@@ -1,9 +1,15 @@
+// CORRAN ESTE COMANDO
+// sudo apt-get install libboost-all-dev
+// g++ -o pruebaEthernet movimientoEthernet.cpp -lboost_system
+
 #include "rclcpp/rclcpp.hpp"
 #include "formato/srv/movearm.hpp"
 #include "formato/srv/moverob.hpp"
-#include "movimiento_robot/myserial.hpp"
+
 #include <string>
 #include <memory>
+#include <string.h>
+#include<iostream>
 
 
 #include <chrono>
@@ -12,8 +18,13 @@
 #include <algorithm>
 #include <stdio.h>
 
-int COMM_SET_DUTY = 5;
-std::string motor_indexes[4]={"/dev/ttyACM0", "/dev/ttyACM1", "/dev/ttyACM2", "/dev/ttyACM3"};
+#include <boost/asio.hpp>
+
+using boost::asio::ip::tcp;
+
+const int COMM_SET_DUTY = 5;
+const int COMM_SET_CURRENT = 6;
+const int COMM_SET_POS = 7;
 
 const unsigned short crc16_tab[] = { 0x0000, 0x1021, 0x2042, 0x3063, 0x4084,
 		0x50a5, 0x60c6, 0x70e7, 0x8108, 0x9129, 0xa14a, 0xb16b, 0xc18c, 0xd1ad,
@@ -54,9 +65,9 @@ unsigned short crc16(unsigned char *buf, unsigned int len) {
 	return cksum;
 }
 
-int PackSendPayload(uint8_t* payload, int lenPay, int num, int motor_index) {
+int PackSendPayload(uint8_t* payload, int lenPay, int num, int motor_index, tcp::socket &socket) {
 	uint16_t crcPayload = crc16(payload, lenPay);
-	std::cout<<crcPayload<<" : ";
+	//std::cout<<crcPayload<<" : ";
 	int count = 0;
 	uint8_t messageSend[256];
 
@@ -81,13 +92,13 @@ int PackSendPayload(uint8_t* payload, int lenPay, int num, int motor_index) {
 
 
 #ifdef DEBUG
-	DEBUGSERIAL.print("UART package send: "); SerialPrint(messageSend, count);
+	DEBUGsocket.print("UART package send: "); socketPrint(messageSend, count);
 
 #endif // DEBUG*/
 
-    mySerial serial(motor_indexes[motor_index],115200);
-	bool respuesta = serial.Send(messageSend, count);
-	serial.Close();
+
+    boost::asio::write(socket, boost::asio::buffer(messageSend));
+
 	return count;
 }
 
@@ -97,39 +108,96 @@ void buffer_append_int32(uint8_t* buffer, int32_t number, int32_t *index) {
 	buffer[(*index)++] = number >> 16;
 	buffer[(*index)++] = number >> 8;
 	buffer[(*index)++] = number;
+	
 }
 
-void VescUartSetDuty(float duty, int num, int motor_index) {
+
+
+void VescUartSetDuty(float duty, int num, int motor_index, tcp::socket &socket) {
 	int32_t index = 0;
-	uint8_t payload[5];
+	uint8_t payload[6];
 
 	payload[index++] = COMM_SET_DUTY;
+	payload[index++] = uint8_t(motor_index);
 	//std::cout<<payload<<"---";
 	buffer_append_int32(payload, (int32_t)(duty * 100000), &index);
-	PackSendPayload(payload, 5, num, motor_index);
+	//std::cout<<"a";
+	PackSendPayload(payload, 6, num, 0, socket);
 }
-void VescUartSetDuty(float duty, int motor_index) {
-	VescUartSetDuty(duty, 0, motor_index);
+void VescUartSetDuty(float duty, int motor_index, tcp::socket &socket) {
+	VescUartSetDuty(duty, 0, motor_index, socket);
 }
+
+
+
+void VescUartSetCurrent(float current, int num, int motor_index, tcp::socket &socket) {
+	int32_t index = 0;
+	uint8_t payload[6];
+
+	payload[index++] = COMM_SET_CURRENT ;
+	payload[index++] = uint8_t(motor_index);
+	buffer_append_int32(payload, (int32_t)(current * 1000), &index);
+	PackSendPayload(payload, 6, num, motor_index, socket);
+}
+void VescUartSetCurrent(float current, int motor_index, tcp::socket &socket){
+	VescUartSetCurrent(current, 0, motor_index, socket);
+}
+
+void VescUartSetPosition(float position, int num, int motor_index, tcp::socket &socket) {
+	int32_t index = 0;
+	uint8_t payload[6];
+
+	payload[index++] = COMM_SET_POS;
+	payload[index++] = uint8_t(motor_index);
+	buffer_append_int32(payload, (int32_t)(position * 1000000.0), &index);
+	PackSendPayload(payload, 6, num, motor_index, socket);
+}
+void VescUartSetPosition(float position, int motor_index, tcp::socket &socket) {
+	VescUartSetPosition(position, motor_index, socket);
+}
+
+
+
+
+// ROS
 
 
 
 double current_motor_velocity[4]={0.0,0.0,0.0,0.0};
 const double incremento = 0.1;
+int pinR[4]=
+{
+	1, // motor derecho
+	2, // motor izquierdo
+	3, // flipper delantero
+	4 // flipper trasero
+}; 
+
+tcp::socket a;
 
 void subscriber_functionR(double r1, double r2, int flippers){
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "moviendo robot");
     
+	
+
+	boost::asio::io_context io_context;
+
+	tcp::resolver resolver(io_context);
+	tcp::resolver::results_type endpoints = resolver.resolve("192.168.0.4", "5000");
+
+	tcp::socket socket(io_context);
+	boost::asio::connect(socket, endpoints);
+	std::cout<<"coneccion establecida\n";
 
 	if(flippers!=0){
 		if(flippers==1){
-			VescUartSetDuty(0.2, 2);
+			VescUartSetCurrent(0.2, pinR[2], socket);
 		}else if(flippers==2){
-			VescUartSetDuty(-0.2, 2);
+			VescUartSetCurrent(-0.2, pinR[2], socket);
 		}else if(flippers==3){
-			VescUartSetDuty(0.2, 3);
+			VescUartSetCurrent(0.2, pinR[3], socket);
 		}else{
-			VescUartSetDuty(-0.2, 3);
+			VescUartSetCurrent(-0.2, pinR[3], socket);
 		}
 		return;
 	}
@@ -143,7 +211,7 @@ void subscriber_functionR(double r1, double r2, int flippers){
         }else if(current_motor_velocity[k]>r[k]){
             current_motor_velocity[k] = std::max(current_motor_velocity[k] - incremento, r[k]);
         }
-        VescUartSetDuty(current_motor_velocity[k], k);
+        VescUartSetCurrent(current_motor_velocity[k], k, socket);
     }
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), 
         "Velocidad:\nmotor 1: %f\nmotor 2: %f",
@@ -162,10 +230,37 @@ void addR(const std::shared_ptr<formato::srv::Moverob::Request> request,
   
 }
 
-void subscriber_functionA(){
+const int pinA[6]=
+{
+	5, // base del brazo, hombro
+	6, // antebrazo 
+	7, // brazo
+	8, // muñeca Y
+	9, // muñeca X
+	10 // garra
+};
+double current_angle[6]  = {0,0,0,0,0,0};
+double correccion[6] = {1.0,1.0,1.0,1.0,1.0,1.0};
+
+
+void subscriber_functionA(vector<double> armi){
 
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "moviendo brazo");
 
+	boost::asio::io_context io_context;
+
+	tcp::resolver resolver(io_context);
+	tcp::resolver::results_type endpoints = resolver.resolve("192.168.0.4", "5000");
+
+	tcp::socket socket(io_context);
+	boost::asio::connect(socket, endpoints);
+	std::cout<<"coneccion establecida\n";
+
+
+	for(int i = 0; i < 6; i++){
+		double pos = (current_angle[i]-armi[i])*2000.0*correccion[i];
+		VescUartSetPosition(pos, pinA[i], socket);
+	}
     return;
 }
 
@@ -179,13 +274,16 @@ void addA(const std::shared_ptr<formato::srv::Movearm::Request> request,
             "motor%d: %d",
                     i, request->armi[i]);
     }
-    subscriber_functionA();         
+    subscriber_functionA(request->armi);         
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "No es requerida ninguna respuesta");
   
 }
 
+
 int main(int argc, char **argv)
 {
+
+	
 	printf("Iniciando servidores para mover brazo y robot\n");
     rclcpp::init(argc, argv);
 
@@ -194,10 +292,9 @@ int main(int argc, char **argv)
     rclcpp::Service<formato::srv::Moverob>::SharedPtr serviceR =
         move->create_service<formato::srv::Moverob>("move_robot", &addR);
 
-    rclcpp::Service<formato::srv::Movearm>::SharedPtr serviceA =
+   // rclcpp::Service<formato::srv::Movearm>::SharedPtr serviceA =
         move->create_service<formato::srv::Movearm>("move_arm", &addA);
 
-
-    rclcpp::spin(move);
-    rclcpp::shutdown();
+	return 0;
 }
+
