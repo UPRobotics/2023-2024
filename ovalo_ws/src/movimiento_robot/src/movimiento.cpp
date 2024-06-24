@@ -202,8 +202,7 @@ void subscriber_functionR(double r1, double r2, int flippers){
 		return;
 	}
 
-    double r[2] = {r2, r2};
-    if(r1==2) r[1] *= -1.0;
+    double r[2] = {r1, r2};
 
     for(int k = 0; k < 2; k++){
         if(current_motor_velocity[k]<r[k]){
@@ -211,7 +210,7 @@ void subscriber_functionR(double r1, double r2, int flippers){
         }else if(current_motor_velocity[k]>r[k]){
             current_motor_velocity[k] = std::max(current_motor_velocity[k] - incremento, r[k]);
         }
-        VescUartSetCurrent(current_motor_velocity[k], k, socket);
+        VescUartSetCurrent(current_motor_velocity[k], pinR[k], socket);
     }
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), 
         "Velocidad:\nmotor 1: %f\nmotor 2: %f",
@@ -224,7 +223,7 @@ void addR(const std::shared_ptr<formato::srv::Moverob::Request> request,
           std::shared_ptr<formato::srv::Moverob::Response> response)
 {
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), 
-        "Informacion recibida:\nd1: %d\nd2:: %d\nflippers: %d",
+        "Informacion recibida:\nd1: %f\nd2:: %f\nflippers: %d",
                 request->d1, request->d2, request->flippers);
     subscriber_functionR(request->d1, request->d2, request->flippers);         
   
@@ -235,9 +234,9 @@ const int pinA[6]=
 	5, // base del brazo, hombro
 	6, // antebrazo 
 	7, // brazo
-	8, // muñeca Y
-	9, // muñeca X
-	10 // garra
+	10, // muñeca Y
+	11, // muñeca X
+	12 // garra
 };
 double current_angle[6]  = {0,0,0,0,0,0};
 double correccion[6] = {1.0,1.0,1.0,1.0,1.0,1.0};
