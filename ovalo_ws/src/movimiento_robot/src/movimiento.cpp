@@ -241,6 +241,11 @@ const int pinA[6]=
 double current_angle[6]  = {0,0,0,0,0,0};
 double correccion[6] = {1.0,1.0,1.0,1.0,1.0,1.0};
 
+const int gira_horario = 3000;
+const int gira_antihorario = 3001;
+const int sin_giro = 3002;
+const double angulo_agregado = 10.0;
+
 
 void subscriber_functionA(vector<double> armi){
 
@@ -257,8 +262,25 @@ void subscriber_functionA(vector<double> armi){
 
 
 	for(int i = 0; i < 6; i++){
-		double pos = (current_angle[i]-armi[i])*2000.0*correccion[i];
-		VescUartSetPosition(pos, pinA[i], socket);
+		if(armi[i] == sin_giro)	continue;
+		double pos;
+		if(armi[i] == giro_horario){
+			pos = current_angle[i]+angulo_agregado;
+		}else if(armi[i] == giro_antihorario){
+			pos = current_angle[i]-angulo_agregado;
+		}else{
+			pos = armi[i]-current_angle[i];
+		}
+		current_angle[i] = pos;
+		if(i<4){
+			VescUartSetPosition(current_angle[i], pinA[i], socket);
+		}else{
+			std::string messageSend = "";
+			messageSend += COMM_SET_POS;
+			messageSend += 6+i;
+			messageSend += buffer_append_int32(payload, (int32_t)(position), &index);
+    			boost::asio::write(socket, boost::asio::buffer(messageSend));
+		}
 	}
     return;
 }
