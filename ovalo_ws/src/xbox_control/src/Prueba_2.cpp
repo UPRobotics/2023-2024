@@ -14,22 +14,14 @@
 
 
 short modo_de_lectura=0;
-bool was_cero=0;
 int motor = 0;
 
 void addCM(const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
           std::shared_ptr<std_srvs::srv::SetBool::Response> response)
 {
-    if(request->data==false){       
-        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Cambiando modo lectura a movimiento del robot");
-        modo_de_lectura=0;
-        response->message="movimiento del robot";
-    }else{
-        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Cambiando modo lectura a movimiento del brazo");
-        modo_de_lectura=1;
-        response->message="movimiento del brazo";
-    }
-    was_cero=0;
+	modo_de_lectura = request->data;
+	RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Cambiando modo lectura a movimiento del robot");
+	response->message="movimiento del robot";
     response->success=true;
     
 }
@@ -64,7 +56,7 @@ void MoveRob(std::vector<double> &axis, std::vector<bool> &botons, short modo){
     request->flippers = flipper;
 
 
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "sending: r1=[%d]        r2=[%d]       flipper=[%d]", r, r2, flipper);
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "sending: r1=[%d]        r2=[%f]       flipper=[%f]", r, r2, flipper);
     auto result = clientRob->async_send_request(request);
     if (rclcpp::spin_until_future_complete(node, result) == rclcpp::FutureReturnCode::SUCCESS){
         RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "succes: %d", true);
@@ -74,9 +66,14 @@ void MoveRob(std::vector<double> &axis, std::vector<bool> &botons, short modo){
     return;
 }
 
+
+const int girar_horario = 3000;
+const int girar_antihorario = 3001;
+const int sin_giro = 3002;
+
 void MoveArm(std::vector<double> &axis, std::vector<bool> &botons){
 
-    std::vector<float> armi(6, 0);
+    std::vector<float> armi(6, sin_giro);
     //establecer que botones hacen que  cosass
     if(botons[4]) motor--;
     if(botons[5]) motor++;
@@ -87,12 +84,13 @@ void MoveArm(std::vector<double> &axis, std::vector<bool> &botons){
     for(int i = 0; i < 6; i++){
         if(armi[i]!=0)  z=false;
     }
-    if(z){
-        if(was_cero) return;
-        was_cero=true;
-    }else{
-        was_cero=false;
-    }
+
+	if(axis[1]>= 0.2){
+		armi[motor] = girar_horario; // valor predeterminado
+	}else if(axis[1]<=-0.2){
+		armi[motor] = girar_antihorario; // valor predeterminado
+	}
+		
 
 
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "sending: ");
@@ -222,12 +220,11 @@ void joyCallback(const sensor_msgs::msg::Joy::SharedPtr joy){
     else if(botons[11]) r = 0;
 */
 
-    if()
 
-    if(modo_de_lectura==0 or modo_de_lectura == 1) MoveRob(axis, botons, modo_de_lectura);
+    if(modo_de_lectura==0 || modo_de_lectura == 1) MoveRob(axis, botons, modo_de_lectura);
     else MoveArm(axis, botons);
 
-    std::this_thread::sleep_for(std::chrono::milliseconds((200)));
+    std::this_thread::sleep_for(std::chrono::milliseconds((100)));//?
 
     return;
 }
