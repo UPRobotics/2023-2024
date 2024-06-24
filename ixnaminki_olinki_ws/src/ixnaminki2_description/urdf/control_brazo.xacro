@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+
+<robot name="ixnaminki_olinki_arm" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <ros2_control type="system" name="RobotSystem">
+        <hardware>
+            <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+        </hardware>
+        <joint name="joint_base_rot">
+            <command_interface name="position">
+                <param name="min">-1</param>
+                <param name="max">1</param>
+            </command_interface>
+            <state_interface name="position"/>
+        </joint>
+        <joint name="joint_lower">
+            <command_interface name="position">
+                <param name="min">-1</param>
+                <param name="max">1</param>
+            </command_interface>
+            <state_interface name="position"/>
+        </joint>
+        <joint name="joint_upper">
+            <command_interface name="position">
+                <param name="min">-1</param>
+                <param name="max">1</param>
+            </command_interface>
+            <state_interface name="position"/>
+        </joint>
+        <joint name="joint_rotative">
+            <command_interface name="position">
+                <param name="min">-1</param>
+                <param name="max">1</param>
+            </command_interface>
+            <state_interface name="position"/>
+        </joint>
+        <joint name="joint_wrist">
+            <command_interface name="position">
+                <param name="min">-1</param>
+                <param name="max">1</param>
+            </command_interface>
+            <state_interface name="position"/>
+        </joint>
+        <joint name="joint_finger">
+            <command_interface name="position">
+                <param name="min">-1</param>
+                <param name="max">1</param>
+            </command_interface>
+            <state_interface name="position"/>
+        </joint>
+        <joint name="joint_finger_mimic">
+            <param name="mimic">joint_finger</param>
+            <param name="multiplier">-1</param>
+            <command_interface name="position">
+                <param name="min">-1</param>
+                <param name="max">1</param>
+            </command_interface>
+        </joint>
+        <!--joint name="joint_barra">
+            <param name="mimic">joint_finger</param>
+            <param name="multiplier">0.0715</param>
+            <command_interface name="position">
+                <param name="min">-1</param>
+                <param name="max">1</param>
+            </command_interface>
+        </joint-->
+    </ros2_control>
+</robot>

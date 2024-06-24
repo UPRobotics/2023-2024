@@ -1,0 +1,524 @@
+<?xml version = "1.0"?>
+
+<robot name="ixnaminki_olinki" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:include filename="$(find ixnaminki2_description)/urdf/gazebo.xacro"/>
+    <xacro:include filename="$(find ixnaminki2_description)/urdf/ix_control.xacro"/>
+
+    <xacro:property name="PI" value="3.14159265359"/>
+    <xacro:property name="effort" value="30"/>
+    <xacro:property name="velocity" value="5"/>
+    <xacro:property name="escala" value="0.0015 0.0015 0.0015"/>
+    <xacro:property name="Z" value="${0.0015/0.004}"/>
+
+    <xacro:macro name="default_transmission" params="number">
+        <transmission name="transmission_${number}">
+            <plugin>transmission_interface/SimpleTransmission</plugin>
+            <joint name="joint_${number}" role="joint_${number}">
+                <mechanicalReduction>1.0</mechanicalReduction>
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="motor_${number}" role="actuator_${number}">
+                <mechanicalReduction>1.0</mechanicalReduction>
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+            </actuator>
+        </transmission>
+    </xacro:macro>
+
+    <xacro:macro name="default_inertial" params="mass">
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="${mass}"/>
+            <inertia ixx="0.0" ixy="0.0" ixz="0.0" 
+                     iyy="0.0" iyz="0.0" 
+                     izz="0.0"/>
+        </inertial>
+    </xacro:macro>
+
+    <link name="world"/>
+
+    <!-- CUERPO -->
+    
+    <link name="base_link">
+        <xacro:default_inertial mass="5.0"/>
+        <visual>
+            <origin xyz="${-Z*1.25} ${Z*0.5} ${Z*0.1}" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/ASSY_TrenInferior/01_Chasis.STL" scale="${escala}"/>
+            </geometry>
+            <material name="base00">
+                <color rgba="0.5 0.3 0.2 0.8"/>
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="${-Z*1.25} ${Z*0.5} ${Z*0.1}" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/ASSY_TrenInferior/01_Chasis.STL" scale="${escala}"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="wheel_right_link">
+        <xacro:default_inertial mass="1.0"/>
+        <visual>
+            <origin xyz="${Z*0} ${Z*0} ${Z*0}" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <sphere radius="0.085"/>
+            </geometry>
+            <material name="base00">
+                <color rgba="0.5 0.3 0.2 0.8"/>
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="${Z*0} ${Z*0} ${Z*0}" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <sphere radius="0.085"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="rec">
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="0.7"/>
+            <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
+        </inertial>
+        <visual name="">
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <box size="0.03 0.03 0.03"/>
+            </geometry>
+            <material name="fer">
+                <color rgba="1.0 0.0 0.0 1.0"/>
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <box size="0.03 0.03 0.03"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="joint_rec" type="fixed">
+        <parent link="wheel_right_link"/>
+        <child link="rec"/>
+        <origin xyz="0.11 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </joint>
+
+    <link name="wheel_left_link">
+        <xacro:default_inertial mass="1.0"/>
+        <visual>
+            <origin xyz="${Z*0} ${Z*0} ${Z*0}" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <sphere radius="0.085"/>
+            </geometry>
+            <material name="base00">
+                <color rgba="0.5 0.3 0.2 0.8"/>
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="${Z*0} ${Z*0} ${Z*0}" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <sphere radius="0.085"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="rec2">
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="0.7"/>
+            <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
+        </inertial>
+        <visual name="">
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <box size="0.03 0.03 0.03"/>
+            </geometry>
+            <material name="fer">
+                <color rgba="1.0 0.0 0.0 1.0"/>
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <box size="0.03 0.03 0.03"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="joint_rec2" type="fixed">
+        <parent link="wheel_left_link"/>
+        <child link="rec2"/>
+        <origin xyz="0.11 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </joint>
+    <link name="02_EjePrincipal">
+        <xacro:default_inertial mass="0.3"/>
+        <visual>
+            <origin xyz="${Z*0.8} ${Z*1.0} ${Z*0.25}" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/ASSY_TrenInferior/02_EjePrincipal.STL" scale="${escala}"/>
+            </geometry>
+            <material name="base">
+                <color rgba="0.73 0.65 0.69 0.8"/>
+            </material>
+        </visual> 
+        <collision>
+            <origin xyz="${Z*0.8} ${Z*1.0} ${Z*0.25}" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/ASSY_TrenInferior/02_EjePrincipal.STL" scale="${escala}"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="02_EjePrincipal2">
+        <xacro:default_inertial mass="0.3"/>
+        <visual>
+            <origin xyz="${Z*-0.73} ${Z*1.0} ${Z*0.25}" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/ASSY_TrenInferior/02_EjePrincipal.STL" scale="${escala}"/>
+            </geometry>
+            <material name="base">
+                <color rgba="0.73 0.65 0.69 0.8"/>
+            </material>
+        </visual> 
+        <collision>
+            <origin xyz="${Z*-0.73} ${Z*1.0} ${Z*0.25}" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/ASSY_TrenInferior/02_EjePrincipal.STL" scale="${escala}"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="01_PlateSprocket">
+        <xacro:default_inertial mass="0.08"/>
+        <visual>
+            <origin xyz="${Z*-1.0} ${Z*1.0} 0.0" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/ASSY_TrenInferior/PlateSprocket.STL" scale="${escala}"/>
+            </geometry>
+            <material name="base"/>
+        </visual> 
+        <collision>
+            <origin xyz="${Z*-1.0} ${Z*1.0} 0.0" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/ASSY_TrenInferior/PlateSprocket.STL" scale="${escala}"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="02_PlateSprocket">
+        <xacro:default_inertial mass="0.08"/>
+        <visual>
+            <origin xyz="${Z*-1.0} ${Z*-1.0} 0.0" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/ASSY_TrenInferior/PlateSprocket.STL" scale="${escala}"/>
+            </geometry>
+            <material name="base"/>
+        </visual> 
+        <collision>
+            <origin xyz="${Z*-1.0} ${Z*-1.0} 0.0" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/ASSY_TrenInferior/PlateSprocket.STL" scale="${escala}"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="03_PlateSprocket">
+        <xacro:default_inertial mass="0.08"/>
+        <visual>
+            <origin xyz="${Z*0.55} ${Z*1.0} 0.0" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/ASSY_TrenInferior/PlateSprocket.STL" scale="${escala}"/>
+            </geometry>
+            <material name="base"/>
+        </visual> 
+        <collision>
+            <origin xyz="${Z*0.55} ${Z*1.0} 0.0" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/ASSY_TrenInferior/PlateSprocket.STL" scale="${escala}"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="04_PlateSprocket">
+        <xacro:default_inertial mass="0.08"/>
+        <visual>
+            <origin xyz="${Z*0.55} ${Z*-1.0} 0.0" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/ASSY_TrenInferior/PlateSprocket.STL" scale="${escala}"/>
+            </geometry>
+            <material name="base"/>
+        </visual> 
+        <collision>
+            <origin xyz="${Z*0.55} ${Z*-1.0} 0.0" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/ASSY_TrenInferior/PlateSprocket.STL" scale="${escala}"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="01_Placa">
+        <xacro:default_inertial mass="0.08"/>
+        <visual>
+            <origin xyz="${Z*0.26} ${Z*0.015} ${Z*0.27}" rpy="1.570795 ${PI} 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/FLIPPER_ASSY/Placa.STL" scale="${escala}"/>
+            </geometry>
+        </visual> 
+        <collision>
+            <origin xyz="${Z*0.26} ${Z*0.015} ${Z*0.27}" rpy="1.570795 ${PI} 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/FLIPPER_ASSY/Placa.STL" scale="${escala}"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="02_Placa">
+        <xacro:default_inertial mass="0.08"/>
+        <visual>
+            <origin xyz="${Z*0.26} ${Z*-0.015} ${Z*0.27}" rpy="1.570795 ${PI} 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/FLIPPER_ASSY/Placa.STL" scale="${escala}"/>
+            </geometry>
+        </visual> 
+        <collision>
+            <origin xyz="${Z*0.26} ${Z*-0.015} ${Z*0.27}" rpy="1.570795 ${PI} 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/FLIPPER_ASSY/Placa.STL" scale="${escala}"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="03_Placa">
+        <xacro:default_inertial mass="0.08"/>
+        <visual>
+            <origin xyz="${Z*-0.26} ${Z*0.015} ${Z*-0.27}" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/FLIPPER_ASSY/Placa.STL" scale="${escala}"/>
+            </geometry>
+        </visual> 
+        <collision>
+            <origin xyz="${Z*-0.26} ${Z*0.015} ${Z*-0.27}" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/FLIPPER_ASSY/Placa.STL" scale="${escala}"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="04_Placa">
+        <xacro:default_inertial mass="0.08"/>
+        <visual>
+            <origin xyz="${Z*-0.26} ${Z*-0.015} ${Z*-0.27}" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/FLIPPER_ASSY/Placa.STL" scale="${escala}"/>
+            </geometry>
+        </visual> 
+        <collision>
+            <origin xyz="${Z*-0.26} ${Z*-0.015} ${Z*-0.27}" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/FLIPPER_ASSY/Placa.STL" scale="${escala}"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="01_FlatSprocket">
+        <xacro:default_inertial mass="0.08"/>
+        <visual>
+            <origin xyz="${Z*-0.55} 0.0 ${Z*-0.47}" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/ASSY_TrenInferior/FlatSprocket.STL" scale="${escala}"/>
+            </geometry>
+            <material name="base"/>
+        </visual> 
+        <collision>
+            <origin xyz="${Z*-0.55} 0.0 ${Z*-0.47}" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/ASSY_TrenInferior/FlatSprocket.STL" scale="${escala}"/>
+            </geometry>
+        </collision>
+    </link>
+
+
+    <link name="02_FlatSprocket">
+        <xacro:default_inertial mass="0.08"/>
+        <visual>
+            <origin xyz="${Z*-0.55} 0.0 ${Z*-0.47}" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/ASSY_TrenInferior/FlatSprocket.STL" scale="${escala}"/>
+            </geometry>
+            <material name="base"/>
+        </visual> 
+        <collision>
+            <origin xyz="${Z*-0.55} 0.0 ${Z*-0.47}" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/ASSY_TrenInferior/FlatSprocket.STL" scale="${escala}"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="03_FlatSprocket">
+        <xacro:default_inertial mass="0.08"/>
+        <visual>
+            <origin xyz="${Z*0.01} 0.0 ${Z*-0.492}" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/ASSY_TrenInferior/FlatSprocket.STL" scale="${escala}"/>
+            </geometry>
+            <material name="base"/>
+        </visual> 
+        <collision>
+            <origin xyz="${Z*0.01} 0.0 ${Z*-0.492}" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/ASSY_TrenInferior/FlatSprocket.STL" scale="${escala}"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="04_FlatSprocket">
+        <xacro:default_inertial mass="0.08"/>
+        <visual>
+            <origin xyz="${Z*0.01} 0.0 ${Z*-0.492}" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/ASSY_TrenInferior/FlatSprocket.STL" scale="${escala}"/>
+            </geometry>
+            <material name="base"/>
+        </visual> 
+        <collision>
+            <origin xyz="${Z*0.01} 0.0 ${Z*-0.492}" rpy="1.570795 0.0 0.0"/>
+            <geometry>
+                <mesh filename="package://ixnaminki2_description/3DModels/ASSY_TrenInferior/FlatSprocket.STL" scale="${escala}"/>
+            </geometry>
+        </collision>
+    </link>
+
+
+
+
+    <joint name="virtual_joint" type="fixed">
+        <parent link="world"/>
+        <child link="base_link"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint> 
+
+    <joint name="joint_1" type="fixed">
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <parent link="base_link"/>
+        <child link="02_EjePrincipal"/>
+    </joint>
+
+    <joint name="joint_2" type="fixed">
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <parent link="base_link"/>
+        <child link="02_EjePrincipal2"/>
+    </joint>
+
+    <joint name="joint_100" type="continuous">
+        <parent link="base_link"/>
+        <child link="wheel_right_link"/>
+        <origin xyz="${-Z*0} ${Z*0.7} ${Z*0.2}" rpy="0.0 0.0 0.0"/>
+        <axis xyz="0 1 0"/>
+    </joint>
+    <joint name="joint_101" type="continuous">
+        <parent link="base_link"/>
+        <child link="wheel_left_link"/>
+        <origin xyz="${Z*0} ${-Z*0.7} ${Z*0.2}" rpy="0.0 0.0 0.0"/>
+        <axis xyz="0 1 0"/>
+    </joint>
+
+    <joint name="joint_3" type="fixed">
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <parent link="02_EjePrincipal2"/>
+        <child link="01_PlateSprocket"/>
+    </joint>
+
+    <joint name="joint_4" type="fixed">
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <parent link="02_EjePrincipal2"/>
+        <child link="02_PlateSprocket"/>
+    </joint>
+
+    <joint name="joint_5" type="fixed">
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <parent link="02_EjePrincipal"/>
+        <child link="03_PlateSprocket"/>
+    </joint>
+
+    <joint name="joint_6" type="fixed">
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <parent link="02_EjePrincipal"/>
+        <child link="04_PlateSprocket"/>
+    </joint>
+
+
+    <joint name ="joint_7" type="revolute">
+        <parent link="02_EjePrincipal2"/>
+        <child link = "01_Placa"/>
+        <origin xyz="${Z*-0.69} ${Z*1.0} ${Z*0.28}"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="-3.0" upper="3.0"
+            effort="${effort}" velocity="${velocity}"/>
+    </joint>
+
+    <joint name ="joint_8" type="revolute">
+        <parent link="02_EjePrincipal2"/>
+        <child link = "02_Placa"/>
+        <origin xyz="${Z*-0.69} ${Z*-1.0} ${Z*0.28}"/>
+        <axis xyz="0 1 0"/>
+        <mimic joint="joint_7" multiplier="1"/>
+        <limit lower="-3.0" upper="3.0"
+            effort="${effort}" velocity="${velocity}"/>
+    </joint>
+
+    <joint name ="joint_9" type="revolute">
+        <parent link="02_EjePrincipal"/>
+        <child link = "03_Placa"/>
+        <origin xyz="${Z*0.84} ${Z*1.0} ${Z*0.29}"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="-3.0" upper="3.0"
+            effort="${effort}" velocity="${velocity}"/>
+    </joint>
+
+    <joint name ="joint_10" type="revolute">
+        <parent link="02_EjePrincipal"/>
+        <child link = "04_Placa"/>
+        <origin xyz="${Z*0.84} ${Z*-1.0} ${Z*0.29}"/>
+        <axis xyz="0 1 0"/>
+        <mimic joint="joint_9" multiplier="1"/>
+        <limit lower="-3.0" upper="3.0"
+            effort="${effort}" velocity="${velocity}"/>
+    </joint>
+
+
+    <joint name="joint_11" type="fixed">
+        <origin xyz="${Z*-0.69} ${Z*-0.015} ${Z*0.28}" rpy="0.0 0.0 0.0"/>
+        <parent link="01_Placa"/>
+        <child link="01_FlatSprocket"/>
+    </joint>
+
+    <joint name="joint_12" type="fixed">
+        <origin xyz="${Z*-0.69} ${Z*0.015} ${Z*0.28}" rpy="0.0 0.0 0.0"/>
+        <parent link="02_Placa"/>
+        <child link="02_FlatSprocket"/>
+    </joint>
+
+    <joint name="joint_13" type="fixed">
+        <origin xyz="${Z*0.84} ${Z*-0.015} ${Z*0.29}" rpy="0.0 0.0 0.0"/>
+        <parent link="03_Placa"/>
+        <child link="03_FlatSprocket"/>
+    </joint>
+
+    <joint name="joint_14" type="fixed">
+        <origin xyz="${Z*0.84} ${Z*0.015} ${Z*0.29}" rpy="0.0 0.0 0.0"/>
+        <parent link="04_Placa"/>
+        <child link="04_FlatSprocket"/>
+    </joint>
+    
+    <!--xacro:default_transmission number="7"/>
+    <xacro:default_transmission number="8"/>
+    <xacro:default_transmission number="9"/>
+    <xacro:default_transmission number="10"/-->
+    <xacro:default_transmission number="100"/>
+    <xacro:default_transmission number="101"/>
+
+</robot>
