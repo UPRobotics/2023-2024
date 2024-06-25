@@ -1,13 +1,15 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
 
+
 def generate_launch_description():
+
+    alexa_interface_node = Node(
+        package="ixnaminki2_alexa",
+        executable="alexa_interface.py",
+        #arguments=[]
+    )
+
     return LaunchDescription([
-        Node(
-            package='ixnaminki2_remote',
-            executable='plan_server',
-            parameters=[ 
-                {'use_sim_time': True},
-            ],
-        ),
+        alexa_interface_node
     ])

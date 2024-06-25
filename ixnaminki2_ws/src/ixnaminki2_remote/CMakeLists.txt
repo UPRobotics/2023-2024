@@ -12,7 +12,7 @@ find_package(rclcpp_components REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(std_srvs)
-find_package(posicion)
+find_package(posicion REQUIRED)
 find_package(control_msgs)
 
 
@@ -26,7 +26,6 @@ add_executable(tasko_client src/task_client.cpp)
 ament_target_dependencies(tasko_client rclcpp std_srvs)
 
 
-
 add_executable(plan_server src/plan_server.cpp)
 ament_target_dependencies(plan_server rclcpp posicion)
 ament_target_dependencies(plan_server rclcpp rclcpp_components)
@@ -38,6 +37,7 @@ ament_target_dependencies(plan_client rclcpp posicion)
 
 add_executable(prueba src/prueba.cpp)
 ament_target_dependencies(prueba rclcpp control_msgs)
+#ament_target_dependencies(prueba rclcpp formatos)
 
 
 install (TARGETS
@@ -48,6 +48,7 @@ install (TARGETS
   prueba
   DESTINATION lib/${PROJECT_NAME}
 )
+
 
 install(
    DIRECTORY launch 

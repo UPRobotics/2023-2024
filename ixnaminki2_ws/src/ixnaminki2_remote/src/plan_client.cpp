@@ -9,6 +9,9 @@ using namespace std::chrono_literals;
 using std::placeholders::_1;
 
 
+double x=-1000,y,z;
+const double inc=25;
+
 class PlanClient : public rclcpp::Node 
 {
 public:
@@ -17,20 +20,40 @@ public:
         client_ = create_client<posicion::srv::Target>("plan");
 
         auto request = std::make_shared<posicion::srv::Target::Request>();
-        request->x = X;
-        request->y = Y;
-        request->z = Z;
-
-        while (!client_->wait_for_service(1s)) {
-            if (!rclcpp::ok()) 
-            {
-                RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-                return;
+        while(x!=X || y!=Y || z!=Z){
+            if(x==-1000) {x=X;; y=Y; z=Z;}
+            if(x<X){
+                x=std::min(x+inc, X);
             }
-            RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "service not available, waiting again...");
-        }
+            if(y<Y){
+                y=std::min(y+inc, Y);
+            }
+            if(z<Z){
+                z=std::min(z+inc, Z);
+            }
+            if(x>X){
+                x=std::max(x-inc, X);
+            }
+            if(y>Y){
+                y=std::max(y-inc, Y);
+            }
+            if(z>Z){
+                z=std::max(z-inc, Z);
+            }
+            request->x = x;
+            request->y = y;
+            request->z = z;
+            while (!client_->wait_for_service(1s)) {
+                if (!rclcpp::ok()) 
+                {
+                    RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+                    return;
+                }
+                RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "service not available, waiting again...");
+            }
+            auto result = client_->async_send_request(request, std::bind(&PlanClient::responseCallback, this, _1));
 
-        auto result = client_->async_send_request(request, std::bind(&PlanClient::responseCallback, this, _1));
+        }
     }
 
 private:
