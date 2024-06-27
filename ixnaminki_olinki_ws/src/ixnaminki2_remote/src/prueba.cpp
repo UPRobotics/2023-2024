@@ -55,13 +55,15 @@ class MinimalSubscriber : public rclcpp::Node
 
                 for(int i = 0; i < 6; i++){
                     request->armi[i]=msg->interface_values[i].values[0];
+                    request->armi[i] = (int)( (request->armi[i]) * 1000.0 );
+                    request->armi[i] /= 1000.0;
                 }
                 auto result = clientCambioEjes->async_send_request(request);
-                if (rclcpp::spin_until_future_complete(result) == rclcpp::FutureReturnCode::SUCCESS){
+           /*     if (rclcpp::spin_until_future_complete(result) == rclcpp::FutureReturnCode::SUCCESS){
                     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "succes: %d", true);
                 }else{
                     RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Failed to call service direcciones");
-                }
+                }*/
 
             
         }

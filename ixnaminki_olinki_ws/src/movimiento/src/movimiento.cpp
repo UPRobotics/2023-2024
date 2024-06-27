@@ -3,13 +3,14 @@
 // g++ -o pruebaEthernet movimientoEthernet.cpp -lboost_system
 
 #include "rclcpp/rclcpp.hpp"
-#include "formato/srv/movearm.hpp"
-#include "formato/srv/moverob.hpp"
+#include "formatos/srv/movearm.hpp"
+#include "formatos/srv/moverob.hpp"
 
 #include <string>
 #include <memory>
 #include <string.h>
 #include<iostream>
+#include <vector>
 
 
 #include <chrono>
@@ -24,7 +25,7 @@ using boost::asio::ip::tcp;
 
 const int COMM_SET_DUTY = 5;
 const int COMM_SET_CURRENT = 6;
-const int COMM_SET_POS = 7;
+const int COMM_SET_POS = 9;
 
 const unsigned short crc16_tab[] = { 0x0000, 0x1021, 0x2042, 0x3063, 0x4084,
 		0x50a5, 0x60c6, 0x70e7, 0x8108, 0x9129, 0xa14a, 0xb16b, 0xc18c, 0xd1ad,
@@ -112,6 +113,13 @@ void buffer_append_int32(uint8_t* buffer, int32_t number, int32_t *index) {
 }
 
 
+void buffer_append_string(std::string &buffer, int32_t number) {
+	buffer += number >> 24;
+	buffer += number >> 16;
+	buffer += number >> 8;
+	buffer += number;	
+}
+
 
 void VescUartSetDuty(float duty, int num, int motor_index, tcp::socket &socket) {
 	int32_t index = 0;
@@ -167,13 +175,12 @@ double current_motor_velocity[4]={0.0,0.0,0.0,0.0};
 const double incremento = 0.1;
 int pinR[4]=
 {
-	1, // motor derecho
-	2, // motor izquierdo
-	3, // flipper delantero
-	4 // flipper trasero
+	20, // motor derecho
+	5, // motor izquierdo
+	7, // flipper delantero
+	10 // flipper trasero
 }; 
-
-tcp::socket a;
+const double correccion_de_corriente = 3.0;
 
 void subscriber_functionR(double r1, double r2, int flippers){
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "moviendo robot");
@@ -191,13 +198,13 @@ void subscriber_functionR(double r1, double r2, int flippers){
 
 	if(flippers!=0){
 		if(flippers==1){
-			VescUartSetCurrent(0.2, pinR[2], socket);
+			VescUartSetCurrent(1, pinR[2], socket);
 		}else if(flippers==2){
-			VescUartSetCurrent(-0.2, pinR[2], socket);
+			VescUartSetCurrent(-1, pinR[2], socket);
 		}else if(flippers==3){
-			VescUartSetCurrent(0.2, pinR[3], socket);
+			VescUartSetCurrent(1, pinR[3], socket);
 		}else{
-			VescUartSetCurrent(-0.2, pinR[3], socket);
+			VescUartSetCurrent(-1, pinR[3], socket);
 		}
 		return;
 	}
@@ -210,7 +217,7 @@ void subscriber_functionR(double r1, double r2, int flippers){
         }else if(current_motor_velocity[k]>r[k]){
             current_motor_velocity[k] = std::max(current_motor_velocity[k] - incremento, r[k]);
         }
-        VescUartSetCurrent(current_motor_velocity[k], pinR[k], socket);
+        VescUartSetCurrent(current_motor_velocity[k]*correccion_de_corriente, pinR[k], socket);
     }
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), 
         "Velocidad:\nmotor 1: %f\nmotor 2: %f",
@@ -219,8 +226,8 @@ void subscriber_functionR(double r1, double r2, int flippers){
 }
 
 
-void addR(const std::shared_ptr<formato::srv::Moverob::Request> request,
-          std::shared_ptr<formato::srv::Moverob::Response> response)
+void addR(const std::shared_ptr<formatos::srv::Moverob::Request> request,
+          std::shared_ptr<formatos::srv::Moverob::Response> response)
 {
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), 
         "Informacion recibida:\nd1: %f\nd2:: %f\nflippers: %d",
@@ -241,13 +248,13 @@ const int pinA[6]=
 double current_angle[6]  = {0,0,0,0,0,0};
 double correccion[6] = {1.0,1.0,1.0,1.0,1.0,1.0};
 
-const int gira_horario = 3000;
-const int gira_antihorario = 3001;
+const int giro_horario = 3000;
+const int giro_antihorario = 3001;
 const int sin_giro = 3002;
 const double angulo_agregado = 10.0;
 
 
-void subscriber_functionA(vector<double> armi){
+void subscriber_functionA(std::vector<double> armi){
 
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "moviendo brazo");
 
@@ -263,6 +270,7 @@ void subscriber_functionA(vector<double> armi){
 
 	for(int i = 0; i < 6; i++){
 		if(armi[i] == sin_giro)	continue;
+		std::cout<<"a\n\n";
 		double pos;
 		if(armi[i] == giro_horario){
 			pos = current_angle[i]+angulo_agregado;
@@ -278,24 +286,26 @@ void subscriber_functionA(vector<double> armi){
 			std::string messageSend = "";
 			messageSend += COMM_SET_POS;
 			messageSend += 6+i;
-			messageSend += buffer_append_int32(payload, (int32_t)(position), &index);
-    			boost::asio::write(socket, boost::asio::buffer(messageSend));
+			buffer_append_string(messageSend, (int32_t)(current_angle[i]));
+    		boost::asio::write(socket, boost::asio::buffer(messageSend));
 		}
 	}
     return;
 }
 
 
-void addA(const std::shared_ptr<formato::srv::Movearm::Request> request,
-          std::shared_ptr<formato::srv::Movearm::Response> response)
+void addA(const std::shared_ptr<formatos::srv::Movearm::Request> request,
+          std::shared_ptr<formatos::srv::Movearm::Response> response)
 {
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Informacion recibida");
+	std::vector<double> armi(6);
     for(int i = 0; i < 6; i++){
         RCLCPP_INFO(rclcpp::get_logger("rclcpp"), 
-            "motor%d: %d",
+            "motor%d: %f",
                     i, request->armi[i]);
+		armi[i] = request->armi[i];
     }
-    subscriber_functionA(request->armi);         
+    subscriber_functionA(armi);         
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "No es requerida ninguna respuesta");
   
 }
@@ -310,11 +320,16 @@ int main(int argc, char **argv)
 
     std::shared_ptr<rclcpp::Node> move = rclcpp::Node::make_shared("ixnaminki_server_move_robot");
 
-    rclcpp::Service<formato::srv::Moverob>::SharedPtr serviceR =
-        move->create_service<formato::srv::Moverob>("move_robot", &addR);
+    rclcpp::Service<formatos::srv::Moverob>::SharedPtr serviceR =
+        move->create_service<formatos::srv::Moverob>("move_robot", &addR);
 
-   // rclcpp::Service<formato::srv::Movearm>::SharedPtr serviceA =
-        move->create_service<formato::srv::Movearm>("move_arm", &addA);
+    rclcpp::Service<formatos::srv::Movearm>::SharedPtr serviceA =
+        move->create_service<formatos::srv::Movearm>("move_arm", &addA);
+        
+        
+        
+    rclcpp::spin(move);
+  
 
 	return 0;
 }

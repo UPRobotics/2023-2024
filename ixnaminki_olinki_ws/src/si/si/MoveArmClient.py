@@ -3,8 +3,6 @@ from rclpy.node import Node
 from formatos.srv import Movearm
 import sys
 
-from CambioEjes import Cambios_ejes
-
 class MoveRobClient(Node):
     def __init__(self,armi):
         super().__init__("ixnaminki_server_move_arm")
@@ -30,10 +28,8 @@ def main ():
         print("Wrong number of arguments! Usage: MoverRobServer")
         return -1
     
-    Cambio_ejes = Cambios_ejes()
-    armi = Cambio_ejes.serviceCallback()
 
-    #armi = [float(sys.argv[i]) for i in range(1, 7)]
+    armi = [float(sys.argv[i]) for i in range(1, 7)]
     Move_rob_client = MoveRobClient(armi)
     rclpy.spin(Move_rob_client)
     Move_rob_client.destroy_node()

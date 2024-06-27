@@ -14,21 +14,14 @@
 
 
 short modo_de_lectura=0;
-bool was_cero=0;
+int motor = 0;
 
 void addCM(const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
           std::shared_ptr<std_srvs::srv::SetBool::Response> response)
 {
-    if(request->data==false){       
-        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Cambiando modo lectura a movimiento del robot");
-        modo_de_lectura=0;
-        response->message="movimiento del robot";
-    }else{
-        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Cambiando modo lectura a movimiento del brazo");
-        modo_de_lectura=1;
-        response->message="movimiento del brazo";
-    }
-    was_cero=0;
+	modo_de_lectura = request->data;
+	RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Cambiando modo lectura a movimiento del robot");
+	response->message="movimiento del robot";
     response->success=true;
     
 }
@@ -39,25 +32,23 @@ std::shared_ptr<rclcpp::Node> node;
 rclcpp::Client<formatos::srv::Moverob>::SharedPtr clientRob;
 rclcpp::Client<formatos::srv::Movearm>::SharedPtr clientArm;
 
-void MoveRob(std::vector<double> &axis, std::vector<bool> &botons){
-    int r=0, r2=0, flipper=0;
 
-    if(axis[1]<=1.0 && axis[1]>0.2) r = std::min(0 + (int)(axis[1] * 100), 99);
-    if(axis[1]>=-1.0 && axis[1]<-0.25) r2 = std::min(0 + (int)(axis[1] * -100), 99);
-    if(axis[0]<=1.0 && axis[0]>0.25) r = std::min(100 + (int)(axis[0] * 100), 199);
-    if(axis[0]>=-1.0 && axis[0]<-0.25) r2 = std::min(100 + (int)(axis[0] * -100), 199);
-    if(r==0 && r2==0 && axis[3]>=-1.0 && axis[3]<=-0.25) flipper  = 1;
-    else if(axis[3]<=1.0 && axis[3]>=0.25) flipper  = 2;
-    else if(axis[4]>=-1.0 && axis[4]<=-0.25) flipper  = 3;
-    else if(axis[4]<=1.0 && axis[4]>=0.25) flipper  = 4;
+void MoveRob(std::vector<double> &axis, std::vector<bool> &botons, short modo){
+    double r=0, r2=0, flipper=0;
 
-    if(r==0 && r2==0 && flipper==0){
-        if(was_cero)  return;
-	    was_cero=true;
-    }else{
-	    was_cero=false;
-    }
+    double variable = 2;
+    if(modo == 0) r = axis[1], r2= axis[4]; //si es el modo 1 (rapido) y el switch esta para mover el robot entonces se movera con respecto a los dos joysticks.
+    if(modo == 1) r = axis[1]/variable, r2=axis[4]/variable; //si es el modo 0 (lento) y el switch esta para mover el robot entonces se movera con respecto a los dos joysticks.
 
+
+    //if(modo == 5){
+        if(botons[2]) flipper = 2; // Flippers de enfrente hacia abajo
+        if(botons[3]) flipper = 1; // Flippers de enfrente hacia arriba
+        if(botons[0]) flipper = 3; // Flippers de atras hacia arriba
+        if(botons[1]) flipper = 4; // Flippers de atras hacia abajo
+    //}
+
+    if((r<0.15 && r>=-0.15) && (r2<0.15 && r2>=-0.15) && flipper==0) return;
     auto request = std::make_shared<formatos::srv::Moverob::Request>();
 
     request->d1 = r;
@@ -65,7 +56,7 @@ void MoveRob(std::vector<double> &axis, std::vector<bool> &botons){
     request->flippers = flipper;
 
 
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "sending: r1=[%d]        r2=[%d]       flipper=[%d]", r, r2, flipper);
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "sending: r1=[%d]        r2=[%f]       flipper=[%f]", r, r2, flipper);
     auto result = clientRob->async_send_request(request);
     if (rclcpp::spin_until_future_complete(node, result) == rclcpp::FutureReturnCode::SUCCESS){
         RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "succes: %d", true);
@@ -75,23 +66,31 @@ void MoveRob(std::vector<double> &axis, std::vector<bool> &botons){
     return;
 }
 
+
+const int girar_horario = 3000;
+const int girar_antihorario = 3001;
+const int sin_giro = 3002;
+
 void MoveArm(std::vector<double> &axis, std::vector<bool> &botons){
 
-    std::vector<float> armi(6, 0);
+    std::vector<float> armi(6, sin_giro);
     //establecer que botones hacen que  cosass
+    if(botons[4]) motor--;
+    if(botons[5]) motor++;
     
     auto request = std::make_shared<formatos::srv::Movearm::Request>();
-
+    
     bool z = true;
     for(int i = 0; i < 6; i++){
         if(armi[i]!=0)  z=false;
     }
-    if(z){
-        if(was_cero) return;
-        was_cero=true;
-    }else{
-        was_cero=false;
-    }
+
+	if(axis[1]>= 0.2){
+		armi[motor] = girar_horario; // valor predeterminado
+	}else if(axis[1]<=-0.2){
+		armi[motor] = girar_antihorario; // valor predeterminado
+	}
+		
 
 
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "sending: ");
@@ -221,10 +220,11 @@ void joyCallback(const sensor_msgs::msg::Joy::SharedPtr joy){
     else if(botons[11]) r = 0;
 */
 
-    if(modo_de_lectura==0) MoveRob(axis, botons);
+
+    if(modo_de_lectura==0 || modo_de_lectura == 1) MoveRob(axis, botons, modo_de_lectura);
     else MoveArm(axis, botons);
 
-    std::this_thread::sleep_for(std::chrono::milliseconds((200)));
+    std::this_thread::sleep_for(std::chrono::milliseconds((100)));//?
 
     return;
 }
@@ -247,8 +247,8 @@ int main(int argc, char ** argv){
 
 	node = rclcpp::Node::make_shared("reader_client");
 
-	clientRob = node->create_client<formatos::srv::Moverob>("direcciones");	
-	clientArm = node->create_client<formatos::srv::Movearm>("direcciones");	
+	clientRob = node->create_client<formatos::srv::Moverob>("move_robot");	
+	clientArm = node->create_client<formatos::srv::Movearm>("move_arm");	
 
     rclcpp::spin(nodes);
 

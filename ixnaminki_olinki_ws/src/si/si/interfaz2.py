@@ -124,13 +124,13 @@ def simulacion():
         Brazo2 = Frame(GUI1, bg="lightblue")
         Brazo2.place(x=10, y=220, width=500, height=100)
 
-        SliderX = Scale(Brazo, from_=-700, to=700, orient=HORIZONTAL, length=300)
+        SliderX = Scale(Brazo, from_=-1000, to=1000, orient=HORIZONTAL, length=300)
         SliderX.pack(pady=8)
 
-        SliderY = Scale(Brazo, from_=-700, to=700, orient=HORIZONTAL, length=300)
+        SliderY = Scale(Brazo, from_=-1000, to=1000, orient=HORIZONTAL, length=300)
         SliderY.pack(pady=8)
 
-        SliderZ = Scale(Brazo, from_=0, to=700, orient=HORIZONTAL, length=300)
+        SliderZ = Scale(Brazo, from_=0, to=1000, orient=HORIZONTAL, length=300)
         SliderZ.pack(pady=8)
 
         Simular = Button(Brazo2, text="Simular", command=changes)
