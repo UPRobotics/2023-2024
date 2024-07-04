@@ -205,10 +205,20 @@ def simulacion():
         subprocess.run(launch1, shell=True)
 
     def OpClaw():
-        pass
+            cd = "pwd"
+            subprocess.run(cd, shell=True)
+            source = "source install/local_setup.bash"
+            subprocess.run(source, shell=True)
+            launch1 = f"ros2 run si MoveArmClient 3000 3000 3000 3000 3000 3000"
+            subprocess.run(launch1, shell=True)
 
     def ClClaw():
-        pass
+            cd = "pwd"
+            subprocess.run(cd, shell=True)
+            source = "source install/local_setup.bash"
+            subprocess.run(source, shell=True)
+            launch1 = f"ros2 run si MoveArmClient 3000 3000 3000 3000 3000 3000"
+            subprocess.run(launch1, shell=True)
 
     def RtClaw():
         pass
