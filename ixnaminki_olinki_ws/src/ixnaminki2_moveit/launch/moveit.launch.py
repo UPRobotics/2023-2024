@@ -35,7 +35,6 @@ def generate_launch_description():
         output="screen",
         parameters=[moveit_config.to_dict(), 
                     {'use_sim_time': True},
-                    {'planning_library': 'ompl'},
                     {'publish_robot_description_semantic': True}],
         arguments=["--ros-args", "--log-level", "info"],
     )

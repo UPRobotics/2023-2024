@@ -248,7 +248,7 @@
         <child link="lower_arm"/>
         <origin xyz="0.0 0.0 ${esc*74}" rpy="0.0 0.0 0.3"/>
         <axis xyz="0 1 0"/>
-        <limit lower="-1.7" upper="1.3" effort="1.0" velocity="5.0"/>
+        <limit lower="-2.077" upper="1.11" effort="1.0" velocity="5.0"/>
     </joint>
 
     <joint name="joint_upper" type="revolute">
@@ -256,7 +256,7 @@
         <child link="upper_arm"/>
         <origin xyz="${esc*255.14} 0.0 ${esc*405.5}" rpy="0.0 0.0 0.0"/>
         <axis xyz="0 1 0"/>
-        <limit lower="-2.0" upper="1.2" effort="1.0" velocity="5.0"/>
+        <limit lower="-1.66" upper="1.39" effort="1.0" velocity="5.0"/>
     </joint>
     <joint name="joint_rotative" type="revolute">
         <parent link="upper_arm"/>
