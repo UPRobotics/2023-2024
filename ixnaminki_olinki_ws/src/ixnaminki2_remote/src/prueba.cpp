@@ -9,6 +9,8 @@ using std::placeholders::_1;
 char state = 2;
 std::vector<double> last_joints;
 const double presicion = 0.0001;
+const double offset[6] = 
+    {0.0,-1.69991511,1.19992,0.0,-0.725398,0.0};
 
 class MinimalSubscriber : public rclcpp::Node
 {
@@ -54,9 +56,12 @@ class MinimalSubscriber : public rclcpp::Node
                 auto request = std::make_shared<formatos::srv::Movearm::Request>();
 
                 for(int i = 0; i < 6; i++){
-                    request->armi[i]=msg->interface_values[i].values[0];
-                    request->armi[i] = (int)( (request->armi[i]) * 1000.0 );
-                    request->armi[i] /= 1000.0;
+                    float grados=msg->interface_values[i].values[0];
+                    grados -= offset[i];
+                    grados = grados * 180.0 / 3.14159265359;
+                    grados = (int)( (grados) * 1000.0 );
+                    grados /= 1000.0;
+                    request->armi[i]=grados;
                 }
                 auto result = clientCambioEjes->async_send_request(request);
            /*     if (rclcpp::spin_until_future_complete(result) == rclcpp::FutureReturnCode::SUCCESS){

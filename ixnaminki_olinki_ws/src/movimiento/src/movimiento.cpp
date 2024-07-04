@@ -25,6 +25,7 @@ using boost::asio::ip::tcp;
 
 const int COMM_SET_DUTY = 5;
 const int COMM_SET_CURRENT = 6;
+const int COMM_SET_RPM = 8;
 const int COMM_SET_POS = 9;
 
 const unsigned short crc16_tab[] = { 0x0000, 0x1021, 0x2042, 0x3063, 0x4084,
@@ -165,6 +166,24 @@ void VescUartSetPosition(float position, int motor_index, tcp::socket &socket) {
 }
 
 
+void VescUartSetRPM(float rpm, int id,  tcp::socket &socket) {
+	int32_t index = 0;
+	uint8_t payload[6];
+
+	payload[index++] = COMM_SET_RPM;
+	payload[index++] = id;
+	buffer_append_int32(payload, (int32_t)(rpm), &index);
+	PackSendPayload(payload, 6, 0, id, socket);
+}
+
+void SetOrigin(tcp::socket &socket){
+	int32_t index = 0;
+	uint8_t payload[2];
+
+	payload[index++] = COMM_SET_RPM;
+	buffer_append_int32(payload, (int32_t)(0), &index);
+	PackSendPayload(payload, 2, 0, 0, socket);
+}
 
 
 // ROS
@@ -172,7 +191,7 @@ void VescUartSetPosition(float position, int motor_index, tcp::socket &socket) {
 
 
 double current_motor_velocity[4]={0.0,0.0,0.0,0.0};
-const double incremento = 0.1;
+const double incremento = 3.5;
 int pinR[4]=
 {
 	20, // motor derecho
@@ -180,12 +199,14 @@ int pinR[4]=
 	7, // flipper delantero
 	10 // flipper trasero
 }; 
-const double correccion_de_corriente = 3.0;
+const double correccion_de_RPM = 30000;
+const double correccion_de_flipper = 5000;
 
 void subscriber_functionR(double r1, double r2, int flippers){
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "moviendo robot");
     
-	
+	try{
+
 
 	boost::asio::io_context io_context;
 
@@ -198,13 +219,16 @@ void subscriber_functionR(double r1, double r2, int flippers){
 
 	if(flippers!=0){
 		if(flippers==1){
-			VescUartSetCurrent(1, pinR[2], socket);
+			VescUartSetRPM(correccion_de_RPM, pinR[2], socket);
 		}else if(flippers==2){
-			VescUartSetCurrent(-1, pinR[2], socket);
+			VescUartSetRPM(-correccion_de_RPM, pinR[2], socket);
 		}else if(flippers==3){
-			VescUartSetCurrent(1, pinR[3], socket);
+			VescUartSetRPM(correccion_de_RPM, pinR[3], socket);
+		}else if(flippers==4){
+			VescUartSetRPM(-correccion_de_RPM, pinR[3], socket);
 		}else{
-			VescUartSetCurrent(-1, pinR[3], socket);
+			std::cout<<"Seteando el origen\n";
+			SetOrigin(socket);
 		}
 		return;
 	}
@@ -212,17 +236,18 @@ void subscriber_functionR(double r1, double r2, int flippers){
     double r[2] = {r1, r2};
 
     for(int k = 0; k < 2; k++){
-        if(current_motor_velocity[k]<r[k]){
-            current_motor_velocity[k] = std::min(current_motor_velocity[k] + incremento, r[k]);
-        }else if(current_motor_velocity[k]>r[k]){
-            current_motor_velocity[k] = std::max(current_motor_velocity[k] - incremento, r[k]);
-        }
-        VescUartSetCurrent(current_motor_velocity[k]*correccion_de_corriente, pinR[k], socket);
+        current_motor_velocity[k] = r[k];
+        VescUartSetRPM(current_motor_velocity[k]*correccion_de_RPM, pinR[k], socket);
     }
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), 
         "Velocidad:\nmotor 1: %f\nmotor 2: %f",
                 current_motor_velocity[0], current_motor_velocity[1]);
     return;
+
+	}catch(std::exception &e){
+		std::cerr << "Exeption: " << e.what()  << "\n";
+		return;
+	}
 }
 
 
@@ -238,15 +263,15 @@ void addR(const std::shared_ptr<formatos::srv::Moverob::Request> request,
 
 const int pinA[6]=
 {
-	5, // base del brazo, hombro
-	6, // antebrazo 
-	7, // brazo
+	21, // base del brazo, hombro
+	3, // antebrazo 
+	2, // brazo
 	10, // muñeca Y
 	11, // muñeca X
 	12 // garra
 };
 double current_angle[6]  = {0,0,0,0,0,0};
-double correccion[6] = {1.0,1.0,1.0,1.0,1.0,1.0};
+double correccion[6] = {50.0,50.0,50.0,10.0,10.0,1.0};
 
 const int giro_horario = 3000;
 const int giro_antihorario = 3001;
@@ -257,6 +282,8 @@ const double angulo_agregado = 10.0;
 void subscriber_functionA(std::vector<double> armi){
 
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "moviendo brazo");
+
+	try{
 
 	boost::asio::io_context io_context;
 
@@ -270,16 +297,16 @@ void subscriber_functionA(std::vector<double> armi){
 
 	for(int i = 0; i < 6; i++){
 		if(armi[i] == sin_giro)	continue;
-		std::cout<<"a\n\n";
 		double pos;
 		if(armi[i] == giro_horario){
 			pos = current_angle[i]+angulo_agregado;
 		}else if(armi[i] == giro_antihorario){
 			pos = current_angle[i]-angulo_agregado;
 		}else{
-			pos = armi[i]-current_angle[i];
+			pos = armi[i]*correccion[i];
 		}
 		current_angle[i] = pos;
+		std::cout<<pos<<"\n";
 		if(i<4){
 			VescUartSetPosition(current_angle[i], pinA[i], socket);
 		}else{
@@ -291,6 +318,11 @@ void subscriber_functionA(std::vector<double> armi){
 		}
 	}
     return;
+
+	}catch(std::exception &e){
+		std::cerr << "Exeption: " << e.what()  << "\n";
+		return;
+	}
 }
 
 

@@ -38,7 +38,7 @@ class EjesSubscriber(Node):
 # Función para actualizar la interfaz con los nuevos datos
 def update_interface(data):
     global label_var
-    label_var.set(f'Received data: {data}')
+    label_var.set("{:.2f}".format(data[0])+"° "+"{:.2f}".format(data[1])+"° "+"{:.2f}".format(data[2])+"° "+"{:.2f}".format(data[3])+"° "+"{:.2f}".format(data[4])+"° "+"{:.2f}".format(data[5])+"° ")
 
 # Función para inicializar el nodo ROS 2 en un hilo separado
 def ros_spin(node):
