@@ -54,6 +54,16 @@ void axis_eje(double &r, double &r2, double x, double y){
     return;
 }
 
+
+const double polaridad[4][2]={
+    1.0,1.0,
+    1.0,-1.0,
+    -1.0,1.0,
+    -1.0,-1.0
+};
+
+short estado_de_polaridad = 0;
+
 void MoveRob(std::vector<double> &axis, std::vector<bool> &botons){
     double r=0, r2=0, flipper=0;
 
@@ -81,8 +91,8 @@ void MoveRob(std::vector<double> &axis, std::vector<bool> &botons){
 
     auto request = std::make_shared<formatos::srv::Moverob::Request>();
 
-    request->d1 = r;
-    request->d2 = r2;
+    request->d1 = r*polaridad[estado_de_polaridad][0];
+    request->d2 = r2*polaridad[estado_de_polaridad][1];
     request->flippers = flipper;
 
 
@@ -268,6 +278,10 @@ void joyCallback(const sensor_msgs::msg::Joy::SharedPtr joy){
     }else if(axis[7] < -0.5){
         std::cout<<"Modo rapido con un solo joystick\n";
         modo = 2;
+    }else if(botons[6]){
+        estado_de_polaridad++;
+        estado_de_polaridad%=4;
+        std::cout<<"Polaridad en: ["<<polaridad[estado_de_polaridad][0]<<"]"<<" : "<<"["<<polaridad[estado_de_polaridad][1]<<"]"<<"\n";
     }else if(botons[8]||modo<3) MoveRob(axis, botons);
     else MoveArm(axis, botons);
 
