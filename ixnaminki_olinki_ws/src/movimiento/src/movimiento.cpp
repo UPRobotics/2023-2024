@@ -128,9 +128,7 @@ void VescUartSetDuty(float duty, int num, int motor_index, tcp::socket &socket) 
 
 	payload[index++] = COMM_SET_DUTY;
 	payload[index++] = uint8_t(motor_index);
-	//std::cout<<payload<<"---";
 	buffer_append_int32(payload, (int32_t)(duty * 100000), &index);
-	//std::cout<<"a";
 	PackSendPayload(payload, 6, num, 0, socket);
 }
 void VescUartSetDuty(float duty, int motor_index, tcp::socket &socket) {
@@ -162,7 +160,7 @@ void VescUartSetPosition(float position, int num, int motor_index, tcp::socket &
 	PackSendPayload(payload, 6, num, motor_index, socket);
 }
 void VescUartSetPosition(float position, int motor_index, tcp::socket &socket) {
-	VescUartSetPosition(position, motor_index, socket);
+	VescUartSetPosition(position, 0, motor_index, socket);
 }
 
 
@@ -191,7 +189,6 @@ void SetOrigin(tcp::socket &socket){
 
 
 double current_motor_velocity[4]={0.0,0.0,0.0,0.0};
-const double incremento = 3.5;
 int pinR[4]=
 {
 	20, // motor derecho
@@ -201,6 +198,9 @@ int pinR[4]=
 }; 
 const double correccion_de_RPM = 30000;
 const double correccion_de_flipper = 5000;
+
+
+double current_angle[6]  = {0,0,0,0,0,0};
 
 void subscriber_functionR(double r1, double r2, int flippers){
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "moviendo robot");
@@ -227,10 +227,16 @@ void subscriber_functionR(double r1, double r2, int flippers){
 		}else if(flippers==4){
 			VescUartSetRPM(-correccion_de_RPM, pinR[3], socket);
 		}else{
-			std::cout<<"Seteando el origen\n";
+        	RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "SETEANDO EL ORIGEN!");
 			SetOrigin(socket);
+			for(int i = 0; i < 6; i++){
+				current_angle[i]=0;
+			}
+			return;
 		}
-		return;
+	}else{
+		VescUartSetRPM(0, pinR[2], socket);
+		VescUartSetRPM(0, pinR[3], socket);
 	}
 
     double r[2] = {r1, r2};
@@ -255,7 +261,7 @@ void addR(const std::shared_ptr<formatos::srv::Moverob::Request> request,
           std::shared_ptr<formatos::srv::Moverob::Response> response)
 {
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), 
-        "Informacion recibida:\nd1: %f\nd2:: %f\nflippers: %d",
+        "Informacion recibida:\nd1: %f\nd2: %f\nflippers: %d",
                 request->d1, request->d2, request->flippers);
     subscriber_functionR(request->d1, request->d2, request->flippers);         
   
@@ -270,13 +276,14 @@ const int pinA[6]=
 	11, // muñeca X
 	12 // garra
 };
-double current_angle[6]  = {0,0,0,0,0,0};
-double correccion[6] = {50.0,50.0,50.0,10.0,10.0,1.0};
+const double angle_limits[2][6] = {  180,  180,  180,  180,  180,  180,
+									-180, -180, -180, -180, -180, -180};
+const double correccion[6] = {50.0,50.0,50.0,10.0,10.0,1.0};
 
 const int giro_horario = 3000;
 const int giro_antihorario = 3001;
 const int sin_giro = 3002;
-const double angulo_agregado = 10.0;
+const double angulo_agregado = 2.0;
 
 
 void subscriber_functionA(std::vector<double> armi){
@@ -299,9 +306,9 @@ void subscriber_functionA(std::vector<double> armi){
 		if(armi[i] == sin_giro)	continue;
 		double pos;
 		if(armi[i] == giro_horario){
-			pos = current_angle[i]+angulo_agregado;
+			pos = std::min(current_angle[i]+angulo_agregado, angle_limits[0][i]);
 		}else if(armi[i] == giro_antihorario){
-			pos = current_angle[i]-angulo_agregado;
+			pos = std::max(current_angle[i]-angulo_agregado, angle_limits[1][i]);
 		}else{
 			pos = armi[i]*correccion[i];
 		}

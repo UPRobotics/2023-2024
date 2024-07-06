@@ -117,10 +117,11 @@ void MoveArm(std::vector<double> &axis, std::vector<bool> &botons){
 
     std::vector<float> armi(6, sin_giro);
     //establecer que botones hacen que  cosass
-    motor -= botons[4];
-    motor += botons[5];
+    motor =  std::max(motor-botons[4], 0);
+    motor =  std::min(motor+botons[5], 5);
     if(botons[4]||botons[5]){
-        std::cout<<"Cambio de motor a: "<<brazo[motor]<<"\n";
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Cambio de motor a [%s]", brazo[motor]);
+        std::this_thread::sleep_for(std::chrono::milliseconds((300)));
         return;
     }
     
@@ -267,21 +268,21 @@ void joyCallback(const sensor_msgs::msg::Joy::SharedPtr joy){
     else if(botons[11]) r = 0;
 */
     if(axis[7] > 0.5) {
-        std::cout<<"Modo lento\n";
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "MODO LENTO");
         modo = 0;
     }else if(axis[6] > 0.5){
-        std::cout<<"Modo rapido\n";
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "MODO RAPIDO");
         modo = 1;
     }else if(axis[6] < -0.5){
-        std::cout<<"Modo brazo\n";
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "MODO BRAZO");
         modo = 3;
     }else if(axis[7] < -0.5){
-        std::cout<<"Modo rapido con un solo joystick\n";
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "MODO RAPIDO CON UN SOLO JOYSTICK");
         modo = 2;
     }else if(botons[6]){
         estado_de_polaridad++;
         estado_de_polaridad%=4;
-        std::cout<<"Polaridad en: ["<<polaridad[estado_de_polaridad][0]<<"]"<<" : "<<"["<<polaridad[estado_de_polaridad][1]<<"]"<<"\n";
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Polaridad en: [%f][%f]", polaridad[estado_de_polaridad][0], polaridad[estado_de_polaridad][1]);
     }else if(botons[8]||modo<3) MoveRob(axis, botons);
     else MoveArm(axis, botons);
 
