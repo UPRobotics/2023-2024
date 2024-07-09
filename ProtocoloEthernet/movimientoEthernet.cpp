@@ -1,12 +1,12 @@
 // CORRAN ESTE COMANDO
 // sudo apt-get install libboost-all-dev
-// g++ -o pruebaEthernet movimientoEthernet.cpp -lboost_system
+// g++ -o client movimientoEthernet.cpp -lboost_system
 
 
-#include "mysocket.hpp"
 #include <string>
 #include <memory>
 #include <string.h>
+#include<iostream>
 
 
 #include <chrono>
@@ -21,6 +21,8 @@ using boost::asio::ip::tcp;
 
 const int COMM_SET_DUTY = 5;
 const int COMM_SET_CURRENT = 6;
+const int COMM_SET_RPM = 8;
+const int COMM_SET_POS = 9;
 
 const unsigned short crc16_tab[] = { 0x0000, 0x1021, 0x2042, 0x3063, 0x4084,
 		0x50a5, 0x60c6, 0x70e7, 0x8108, 0x9129, 0xa14a, 0xb16b, 0xc18c, 0xd1ad,
@@ -118,6 +120,8 @@ void VescUartSetDuty(float duty, int num, int motor_index, tcp::socket &socket) 
 	//std::cout<<payload<<"---";
 	buffer_append_int32(payload, (int32_t)(duty * 100000), &index);
 	//std::cout<<"a";
+
+
 	PackSendPayload(payload, 6, num, 0, socket);
 }
 void VescUartSetDuty(float duty, int motor_index, tcp::socket &socket) {
@@ -139,6 +143,64 @@ void VescUartSetCurrent(float current, int motor_index, tcp::socket &socket){
 	VescUartSetCurrent(current, 0, motor_index, socket);
 }
 
+void VescUartSetPosition(float position, int num, int motor_index, tcp::socket &socket) {
+	int32_t index = 0;
+	uint8_t payload[6];
+
+	payload[index++] = COMM_SET_POS;
+	payload[index++] = uint8_t(motor_index);
+	buffer_append_int32(payload, (int32_t)(position), &index);
+	//for(int i = 0; i < 6; i++)
+		//std::cout<<(int)(payload[i])<<"\n";
+	boost::asio::write(socket, boost::asio::buffer(payload));
+	//PackSendPayload(payload, 5, num, motor_index, socket);
+}
+void VescUartSetPosition(float position, int motor_index, tcp::socket &socket) {
+	VescUartSetPosition(position, 0, motor_index, socket);
+}
+
+void VescUartSetPosition_(float position, int motor_index, tcp::socket &socket) {
+	int32_t index = 0;
+	uint8_t payload[6];
+
+	payload[index++] = COMM_SET_POS ;
+	payload[index++] = motor_index;
+
+	buffer_append_int32(payload, (int32_t)(position * 1000000.0), &index);
+	PackSendPayload(payload, 6, 0, 0, socket);
+}
+
+void comm_alive_(tcp::socket &socket) {
+	int32_t index = 0;
+	uint8_t payload[1];
+
+	payload[index++] = 30;
+	PackSendPayload(payload, 1, 0, 0, socket);
+}
+void comm_alive(tcp::socket &socket) {
+	comm_alive_(socket);
+}
+
+
+void VescUartSetRPM(float rpm, int id,  tcp::socket &socket) {
+	int32_t index = 0;
+	uint8_t payload[6];
+
+	payload[index++] = COMM_SET_RPM;
+	payload[index++] = id;
+	buffer_append_int32(payload, (int32_t)(rpm), &index);
+	PackSendPayload(payload, 6, 0, id, socket);
+}
+
+
+void SetOrigin(tcp::socket &socket){
+	int32_t index = 0;
+	uint8_t payload[2];
+
+	payload[index++] = COMM_SET_RPM;
+	buffer_append_int32(payload, (int32_t)(0), &index);
+	PackSendPayload(payload, 6, 0, 0, socket);
+}
 
 
 int main()
@@ -146,13 +208,23 @@ int main()
     boost::asio::io_context io_context;
 
     tcp::resolver resolver(io_context);
-    tcp::resolver::results_type endpoints = resolver.resolve("192.168.1.254", "12345");
-
-    tcp::socket socket(io_context);
+    std::cout<<"probando coneccion\n";
+    tcp::resolver::results_type endpoints = resolver.resolve("192.168.0.4", "5000");
+	tcp::socket socket = tcp::socket(io_context);
     boost::asio::connect(socket, endpoints);
     std::cout<<"coneccion exitosa\n";
 
-	VescUartSetCurrent(50, 48, socket);
+
+
+
+
+	while(true){
+		float x; int id=0; std::cin>>x>>id;
+		//VescUartSetRpm(x, id, socket);
+    	std::this_thread::sleep_for(std::chrono::milliseconds((100)));
+		std::cout<<"a";
+	}
+
 
 
 	return 0;
