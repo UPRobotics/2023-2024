@@ -209,7 +209,7 @@ int main()
 
     tcp::resolver resolver(io_context);
     std::cout<<"probando coneccion\n";
-    tcp::resolver::results_type endpoints = resolver.resolve("192.168.0.4", "5000");
+    tcp::resolver::results_type endpoints = resolver.resolve("192.168.0.5", "5000");
 	tcp::socket socket = tcp::socket(io_context);
     boost::asio::connect(socket, endpoints);
     std::cout<<"coneccion exitosa\n";
@@ -220,8 +220,13 @@ int main()
 
 	while(true){
 		float x; int id=0; std::cin>>x>>id;
-		//VescUartSetRpm(x, id, socket);
-    	std::this_thread::sleep_for(std::chrono::milliseconds((100)));
+
+		for(int i = 0; i < 30; i++){
+			//VescUartSetRPM(x, id, socket);
+			VescUartSetCurrent(x, id, socket);
+			//VescUartSetC(x, id, socket);
+			std::this_thread::sleep_for(std::chrono::milliseconds((20)));
+		}
 		std::cout<<"a";
 	}
 
