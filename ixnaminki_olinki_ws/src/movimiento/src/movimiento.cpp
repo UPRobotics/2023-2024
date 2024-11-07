@@ -191,13 +191,13 @@ void SetOrigin(tcp::socket &socket){
 double current_motor_velocity[4]={0.0,0.0,0.0,0.0};
 int pinR[4]=
 {
-	20, // motor derecho
-	5, // motor izquierdo
-	7, // flipper delantero
-	10 // flipper trasero
+	3, // motor derecho
+	4, // motor izquierdo
+	1, // flipper delantero
+	2 // flipper trasero
 }; 
-const double correccion_de_RPM = 30000;
-const double correccion_de_flipper = 5000;
+const double correccion_de_corriente = 40;
+const double correccion_de_flipper = 38;
 
 
 double current_angle[6]  = {0,0,0,0,0,0};
@@ -219,13 +219,13 @@ void subscriber_functionR(double r1, double r2, int flippers){
 
 	if(flippers!=0){
 		if(flippers==1){
-			VescUartSetRPM(correccion_de_RPM, pinR[2], socket);
+			VescUartSetCurrent(correccion_de_flipper, pinR[2], socket);
 		}else if(flippers==2){
-			VescUartSetRPM(-correccion_de_RPM, pinR[2], socket);
+			VescUartSetCurrent(-correccion_de_flipper, pinR[2], socket);
 		}else if(flippers==3){
-			VescUartSetRPM(correccion_de_RPM, pinR[3], socket);
+			VescUartSetCurrent(correccion_de_flipper, pinR[3], socket);
 		}else if(flippers==4){
-			VescUartSetRPM(-correccion_de_RPM, pinR[3], socket);
+			VescUartSetCurrent(-correccion_de_flipper, pinR[3], socket);
 		}else{
         	RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "SETEANDO EL ORIGEN!");
 			SetOrigin(socket);
@@ -235,15 +235,15 @@ void subscriber_functionR(double r1, double r2, int flippers){
 			return;
 		}
 	}else{
-		VescUartSetRPM(0, pinR[2], socket);
-		VescUartSetRPM(0, pinR[3], socket);
+		VescUartSetCurrent(0, pinR[2], socket);
+		VescUartSetCurrent(0, pinR[3], socket);
 	}
 
     double r[2] = {r1, r2};
 
     for(int k = 0; k < 2; k++){
         current_motor_velocity[k] = r[k];
-        VescUartSetRPM(current_motor_velocity[k]*correccion_de_RPM, pinR[k], socket);
+        VescUartSetCurrent(current_motor_velocity[k]*correccion_de_corriente, pinR[k], socket);
     }
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), 
         "Velocidad:\nmotor 1: %f\nmotor 2: %f",

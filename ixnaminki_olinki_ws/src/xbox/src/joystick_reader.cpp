@@ -56,13 +56,15 @@ void axis_eje(double &r, double &r2, double x, double y){
 
 
 const double polaridad[4][2]={
-    1.0,1.0,
     1.0,-1.0,
+    1.0,1.0,
     -1.0,1.0,
     -1.0,-1.0
 };
 
 short estado_de_polaridad = 0;
+
+int cnt_flipper=0;
 
 void MoveRob(std::vector<double> &axis, std::vector<bool> &botons){
     double r=0, r2=0, flipper=0;
@@ -80,8 +82,8 @@ void MoveRob(std::vector<double> &axis, std::vector<bool> &botons){
     else if(botons[0]) flipper = 3; // Flippers de atras hacia arriba
     else if(botons[1]) flipper = 4; // Flippers de atras hacia abajo
     
-    r = ((r*r) + 0.1*r*(r>0?1.0:-1.0))*(r>0?1.0:-1.0);
-    r2 = ((r2*r2) + 0.1*r2*(r2>0?1.0:-1.0))*(r2>0?1.0:-1.0);
+    r = r*r * (r>0?1.0:-1.0);//((r*r) + 0.1*r*(r>0?1.0:-1.0))*(r>0?1.0:-1.0);
+    r2 = r2*r2 * (r2>0?1.0:-1.0);//((r2*r2) + 0.1*r2*(r2>0?1.0:-1.0))*(r2>0?1.0:-1.0);
     if((r<0.05 && r>=-0.05) && (r2<0.05 && r2>=-0.05) && flipper==0) {
         cnt++;
         if(cnt > lmt_mandar){
@@ -95,6 +97,14 @@ void MoveRob(std::vector<double> &axis, std::vector<bool> &botons){
     request->d2 = r2*polaridad[estado_de_polaridad][1];
     request->flippers = flipper;
 
+	if(flipper!=0){
+		cnt_flipper++;
+	}else{
+		cnt_flipper=0;
+	}
+	if(cnt_flipper>10){
+		return;
+	}
 
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "sending: r1=[%f]        r2=[%f]       flipper=[%f]", r, r2, flipper);
     auto result = clientRob->async_send_request(request);
